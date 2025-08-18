@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/functions.php';
+require_once '../includes/email_functions.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -124,7 +125,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $address_detail, 'uploads/proof_documents/' . $filename, 
                 $document_type, $occupation, $motivation
             ])) {
+                // Send confirmation email
+                sendApplicationConfirmationEmail($email, $full_name);
+                
                 $success_message = "आवेदन सफलतापूर्वक पेश गरियो! (Application submitted successfully!)<br>" .
+                                 "तपाईंको इमेलमा पुष्टिकरण पठाइएको छ। (Confirmation sent to your email)<br>" .
                                  "हाम्रो टोलीले तपाईंको आवेदन समीक्षा गर्नेछ र 2-3 दिनमा इमेल मार्फत जानकारी दिनेछ।<br>" .
                                  "<em>Our team will review your application and notify you via email within 2-3 days.</em>";
             } else {
@@ -187,10 +192,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <i class="fas fa-user me-2"></i>व्यक्तिगत जानकारी (Personal Information)
                                 </h5>
                                 
-                                <div class="mb-3">
+                            <div class="mb-3">
                                     <label for="full_name" class="form-label">पूरा नाम (Full Name) *</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
                                         <input type="text" class="form-control" id="full_name" name="full_name" 
                                                placeholder="आफ्नो पूरा नाम लेख्नुहोस्"
                                                value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>" required>
@@ -284,9 +289,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <option value="rental_agreement" <?php echo ($_POST['document_type'] ?? '') === 'rental_agreement' ? 'selected' : ''; ?>>भाडा सम्झौता (Rental Agreement)</option>
                                         <option value="bank_statement" <?php echo ($_POST['document_type'] ?? '') === 'bank_statement' ? 'selected' : ''; ?>>ब्यांक स्टेटमेन्ट (Bank Statement)</option>
                                     </select>
-                                </div>
-                                
-                                <div class="mb-3">
+                            </div>
+                            
+                            <div class="mb-3">
                                     <label for="proof_document" class="form-label">निवास प्रमाण कागजात (Proof of Residence) *</label>
                                     <input type="file" class="form-control" id="proof_document" name="proof_document" 
                                            accept=".jpg,.jpeg,.png,.pdf" required>
@@ -302,8 +307,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <h5 class="text-primary mb-3">
                                     <i class="fas fa-edit me-2"></i>आवेदन विवरण (Application Details)
                                 </h5>
-                                
-                                <div class="mb-3">
+                            
+                            <div class="mb-3">
                                     <label for="motivation" class="form-label">शिक्षा मित्रमा किन सामेल हुन चाहनुहुन्छ? *</label>
                                     <textarea class="form-control" id="motivation" name="motivation" rows="4" 
                                               placeholder="शिक्षा क्षेत्रमा तपाईंको योगदान, समुदायमा देखिएका समस्याहरू, र कसरी मद्दत गर्न चाहनुहुन्छ भन्नुहोस्..." required><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
@@ -328,8 +333,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="confirm_password" class="form-label">Confirm Password *</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                             <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
                                                    placeholder="पासवर्ड पुन: लेख्नुहोस्" required>
                                         </div>
@@ -351,7 +356,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php if (empty($success_message)): ?>
                                 <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
                                     <i class="fas fa-paper-plane me-2"></i>आवेदन पेश गर्नुहोस् (Submit Application)
-                                </button>
+                            </button>
                             <?php else: ?>
                                 <div class="text-center">
                                     <a href="../index.php" class="btn btn-success btn-lg">

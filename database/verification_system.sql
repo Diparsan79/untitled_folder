@@ -60,6 +60,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS occupation ENUM('teacher', 'student', 'parent', 'education_officer', 'community_member');
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_date TIMESTAMP NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP NULL;
 
 -- Add foreign key for community
 ALTER TABLE users ADD CONSTRAINT fk_user_community FOREIGN KEY (community_id) REFERENCES communities(id);
