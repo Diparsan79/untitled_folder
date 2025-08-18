@@ -7,18 +7,30 @@ if (isLoggedIn()) {
 }
 
 $errors = [];
+$success_message = '';
+
+// Get communities for dropdown
+$pdo = getDBConnection();
+$stmt = $pdo->prepare("SELECT id, name, district, province FROM communities ORDER BY province, district, name");
+$stmt->execute();
+$communities = $stmt->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = sanitizeInput($_POST['username'] ?? '');
+    $full_name = sanitizeInput($_POST['full_name'] ?? '');
     $email = sanitizeInput($_POST['email'] ?? '');
+    $phone = sanitizeInput($_POST['phone'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
+    $community_id = (int)($_POST['community_id'] ?? 0);
+    $address_detail = sanitizeInput($_POST['address_detail'] ?? '');
+    $occupation = $_POST['occupation'] ?? '';
+    $motivation = sanitizeInput($_POST['motivation'] ?? '');
+    $document_type = $_POST['document_type'] ?? '';
+    $proof_document = $_FILES['proof_document'] ?? null;
     
     // Validation
-    if (empty($username)) {
-        $errors[] = "Username is required";
-    } elseif (strlen($username) < 3) {
-        $errors[] = "Username must be at least 3 characters long";
+    if (empty($full_name) || strlen($full_name) < 3) {
+        $errors[] = "पूरा नाम आवश्यक छ (Full name is required, minimum 3 characters)";
     }
     
     if (empty($email)) {
@@ -29,38 +41,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Please enter a properly formatted email address";
     }
     
-    if (empty($password)) {
-        $errors[] = "Password is required";
-    } elseif (strlen($password) < 6) {
-        $errors[] = "Password must be at least 6 characters long";
+    if (empty($phone) || !preg_match('/^[0-9+\-\s()]{10,15}$/', $phone)) {
+        $errors[] = "फोन नम्बर आवश्यक छ (Valid phone number is required)";
+    }
+    
+    if (empty($password) || strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters long";
     }
     
     if ($password !== $confirm_password) {
         $errors[] = "Passwords do not match";
     }
     
-    // Check if username or email already exists
-    if (empty($errors)) {
-        $pdo = getDBConnection();
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $email]);
+    if ($community_id <= 0) {
+        $errors[] = "कृपया आफ्नो समुदाय छान्नुहोस् (Please select your community)";
+    }
+    
+    if (empty($address_detail) || strlen($address_detail) < 10) {
+        $errors[] = "पूरा ठेगाना आवश्यक छ (Complete address is required, minimum 10 characters)";
+    }
+    
+    if (empty($occupation)) {
+        $errors[] = "पेशा छान्नुहोस् (Please select your occupation)";
+    }
+    
+    if (empty($motivation) || strlen($motivation) < 20) {
+        $errors[] = "शिक्षा मित्रमा सामेल हुने कारण लेख्नुहोस् (Please explain why you want to join Shiksha Mitra, minimum 20 characters)";
+    }
+    
+    if (empty($document_type)) {
+        $errors[] = "प्रमाण कागजातको प्रकार छान्नुहोस् (Please select document type)";
+    }
+    
+    // Validate proof document upload
+    if (!$proof_document || $proof_document['error'] !== UPLOAD_ERR_OK) {
+        $errors[] = "निवास प्रमाणको कागजात अपलोड गर्नुहोस् (Please upload proof of residence document)";
+    } else {
+        $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+        $max_size = 5 * 1024 * 1024; // 5MB
         
-        if ($stmt->fetch()) {
-            $errors[] = "Username or email already exists";
+        if (!in_array($proof_document['type'], $allowed_types)) {
+            $errors[] = "केवल JPEG, PNG वा PDF फाइलहरू मात्र अनुमति छ (Only JPEG, PNG, or PDF files are allowed)";
+        } elseif ($proof_document['size'] > $max_size) {
+            $errors[] = "फाइलको साइज 5MB भन्दा कम हुनुपर्छ (File size must be less than 5MB)";
         }
     }
     
-    // Create user if no errors
+    // Check if email already exists in applications or users
     if (empty($errors)) {
-        $pdo = getDBConnection();
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $pdo->prepare("SELECT id FROM user_applications WHERE email = ? UNION SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email, $email]);
         
-        $stmt = $pdo->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+        if ($stmt->fetch()) {
+            $errors[] = "यो इमेल पहिले नै प्रयोग भएको छ (This email is already in use)";
+        }
+    }
+    
+    // Process application if no errors
+    if (empty($errors)) {
+        // Upload proof document
+        $upload_dir = __DIR__ . '/../uploads/proof_documents/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
         
-        if ($stmt->execute([$username, $email, $hashedPassword])) {
-            redirect('../auth/login.php', 'Registration successful! Please log in.', 'success');
+        $file_extension = pathinfo($proof_document['name'], PATHINFO_EXTENSION);
+        $filename = 'proof_' . uniqid() . '.' . $file_extension;
+        $file_path = $upload_dir . $filename;
+        
+        if (move_uploaded_file($proof_document['tmp_name'], $file_path)) {
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            
+            $stmt = $pdo->prepare("
+                INSERT INTO user_applications 
+                (full_name, email, phone, password_hash, community_id, address_detail, 
+                 proof_document_path, document_type, occupation, motivation) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            
+            if ($stmt->execute([
+                $full_name, $email, $phone, $hashedPassword, $community_id, 
+                $address_detail, 'uploads/proof_documents/' . $filename, 
+                $document_type, $occupation, $motivation
+            ])) {
+                $success_message = "आवेदन सफलतापूर्वक पेश गरियो! (Application submitted successfully!)<br>" .
+                                 "हाम्रो टोलीले तपाईंको आवेदन समीक्षा गर्नेछ र 2-3 दिनमा इमेल मार्फत जानकारी दिनेछ।<br>" .
+                                 "<em>Our team will review your application and notify you via email within 2-3 days.</em>";
+            } else {
+                $errors[] = "आवेदन पेश गर्न असफल (Failed to submit application). Please try again.";
+                unlink($file_path); // Remove uploaded file on database error
+            }
         } else {
-            $errors[] = "Registration failed. Please try again.";
+            $errors[] = "फाइल अपलोड गर्न असफल (Failed to upload document). Please try again.";
         }
     }
 }
@@ -84,18 +156,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
                             <i class="fas fa-graduation-cap fa-3x text-primary"></i>
-                            <h2 class="mt-3">Shiksha Mitra मा सामेल हुनुहोस्</h2>
-                            <p class="text-muted">Join our educational community</p>
-                            <p class="small text-muted">Help improve Nepal's education system together</p>
+                            <h2 class="mt-3">Shiksha Mitra मा आवेदन दिनुहोस्</h2>
+                            <p class="text-muted">Apply to join our verified educational community</p>
+                            <p class="small text-muted">सत्यापित शैक्षिक समुदायमा सामेल हुन आवेदन दिनुहोस्</p>
                         </div>
                         
                         <?php if (!empty($errors)): ?>
                             <div class="alert alert-danger">
-                                <ul class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>कृपया निम्न त्रुटिहरू सच्याउनुहोस्:</strong>
+                                <ul class="mb-0 mt-2">
                                     <?php foreach ($errors as $error): ?>
                                         <li><?php echo $error; ?></li>
                                     <?php endforeach; ?>
                                 </ul>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($success_message)): ?>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <?php echo $success_message; ?>
                             </div>
                         <?php endif; ?>
                         
