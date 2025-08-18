@@ -1,5 +1,6 @@
 <?php
 require_once '../includes/functions.php';
+require_once '../includes/email_functions.php';
 
 // Simple admin authentication (you can enhance this later)
 session_start();
@@ -125,8 +126,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $app['phone'], $app['community_id'], $special_id, $app['occupation']
             ]);
             
-            // Send email with special ID (you can implement email sending here)
-            $message = "Application approved! Special ID: $special_id";
+            // Send email with special ID
+            $stmt = $pdo->prepare("SELECT name FROM communities WHERE id = ?");
+            $stmt->execute([$app['community_id']]);
+            $community = $stmt->fetch();
+            
+            if (sendSpecialIDEmail($app['email'], $app['full_name'], $special_id, $community['name'])) {
+                $message = "Application approved! Special ID generated and emailed to user.";
+            } else {
+                $message = "Application approved! Special ID: $special_id (Email sending failed - please send manually)";
+            }
         }
     } elseif ($action === 'reject') {
         $stmt = $pdo->prepare("
@@ -135,7 +144,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             WHERE id = ?
         ");
         $stmt->execute([$_SESSION['admin_id'], $review_notes, $application_id]);
-        $message = "Application rejected.";
+        
+        // Send rejection email
+        $stmt = $pdo->prepare("SELECT full_name, email FROM user_applications WHERE id = ?");
+        $stmt->execute([$application_id]);
+        $app = $stmt->fetch();
+        
+        if ($app && sendRejectionEmail($app['email'], $app['full_name'], $review_notes)) {
+            $message = "Application rejected and user notified via email.";
+        } else {
+            $message = "Application rejected (Email notification failed).";
+        }
     }
     
     if (isset($message)) {
