@@ -51,16 +51,15 @@ function handleVote(event) {
             button.classList.add('success-feedback');
             setTimeout(() => button.classList.remove('success-feedback'), 600);
             
-            // Show success message in Nepali and English
-            const voteTypeNepali = voteType === 'upvote' ? 'समर्थन' : 'विरोध';
-            showMessage(`${voteTypeNepali} मत सफलतापूर्वक दर्ता भयो! (Vote recorded successfully!)`, 'success');
+            // Show success message (English only)
+            showMessage('Vote recorded successfully!', 'success');
         } else {
-            showMessage(data.message || 'मत दर्ता गर्न सकिएन (Failed to record vote)', 'error');
+            showMessage(data.message || 'Failed to record vote', 'error');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showMessage('मत दिंदा त्रुटि भयो (An error occurred while voting)', 'error');
+        showMessage('An error occurred while voting', 'error');
     })
     .finally(() => {
         // Remove loading state
@@ -192,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (!isValid) {
                 e.preventDefault();
-                showMessage('कृपया सबै आवश्यक फिल्डहरू भर्नुहोस् (Please fill all required fields)', 'warning');
+                showMessage('Please fill all required fields', 'warning');
             }
         });
     });
@@ -204,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (this.value && !emailRegex.test(this.value)) {
                 this.classList.add('is-invalid');
-                showMessage('कृपया मान्य इमेल ठेगाना प्रविष्ट गर्नुहोस् (Please enter a valid email address)', 'warning');
+                showMessage('Please enter a valid email address', 'warning');
             } else if (this.value) {
                 this.classList.remove('is-invalid');
                 this.classList.add('is-valid');

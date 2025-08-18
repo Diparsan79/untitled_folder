@@ -76,7 +76,7 @@ if (isLoggedIn()) {
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="../index.php">
-                <i class="fas fa-graduation-cap me-2"></i>Shiksha Mitra <span class="nepali-text">शिक्षा मित्र</span>
+                <i class="fas fa-graduation-cap me-2"></i>Shiksha Mitra
             </a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="../index.php">Home</a>
@@ -178,20 +178,18 @@ if (isLoggedIn()) {
                             
                             <form method="POST" action="" class="mb-4">
                                 <div class="mb-3">
-                                    <label for="comment" class="form-label">
-                                        आफ्नो विचार राख्नुहोस् (Add your comment)
-                                    </label>
+                                    <label for="comment" class="form-label">Add your comment</label>
                                     <textarea class="form-control" id="comment" name="comment" rows="3" 
                                               placeholder="Share your thoughts, suggestions, or updates about this educational issue..." required></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane me-2"></i>टिप्पणी पोस्ट गर्नुहोस् (Post Comment)
+                                    <i class="fas fa-paper-plane me-2"></i>Post Comment
                                 </button>
                             </form>
                         <?php else: ?>
                             <div class="alert alert-info text-center">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>टिप्पणी गर्न लगिन गर्नुपर्छ।</strong> (Please login to post comments)<br>
+                                <strong>Please login to post comments</strong><br>
                                 <a href="../auth/login.php" class="btn btn-primary btn-sm mt-2">
                                     <i class="fas fa-sign-in-alt me-1"></i>Login
                                 </a>

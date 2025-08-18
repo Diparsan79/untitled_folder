@@ -14,9 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validation
     if (empty($special_id) || empty($password)) {
-        $errors[] = "विशेष आइडी र पासवर्ड दुवै आवश्यक छ (Both Special ID and password are required)";
+        $errors[] = "Both Special ID and password are required";
     } elseif (!preg_match('/^SM[0-9]{6}[A-Z]{2}$/', $special_id)) {
-        $errors[] = "अमान्य विशेष आइडी ढाँचा (Invalid Special ID format)";
+        $errors[] = "Invalid Special ID format";
     } else {
         // Authenticate user with special ID
         $pdo = getDBConnection();
@@ -42,9 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
             $stmt->execute([$user['id']]);
             
-            redirect('../index.php', 'स्वागत छ ' . $user['full_name'] . '! Welcome back!', 'success');
+            redirect('../index.php', 'Welcome back, ' . $user['full_name'] . '!', 'success');
         } else {
-            $errors[] = "गलत विशेष आइडी वा पासवर्ड (Invalid Special ID or password)";
+            $errors[] = "Invalid Special ID or password";
             
             // Log failed login attempt
             error_log("Failed login attempt with Special ID: $special_id from IP: " . $_SERVER['REMOTE_ADDR']);
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
                             <i class="fas fa-graduation-cap fa-3x text-primary"></i>
-                            <h2 class="mt-3">फेरि आउनुभयो! Welcome Back</h2>
+                            <h2 class="mt-3">Welcome Back</h2>
                             <p class="text-muted">Sign in to your Shiksha Mitra account</p>
                             <p class="small text-muted">Access educational community discussions</p>
                         </div>
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <form method="POST" action="">
                             <div class="mb-3">
-                                <label for="special_id" class="form-label">विशेष आइडी (Special ID)</label>
+                                <label for="special_id" class="form-label">Special ID</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                     <input type="text" class="form-control" id="special_id" name="special_id" 
@@ -98,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    तपाईंलाई इमेल मार्फत पठाइएको विशेष आइडी प्रयोग गर्नुहोस्<br>
                                     Use the Special ID sent to your email after verification
                                 </small>
                             </div>
@@ -112,19 +111,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             
                             <button type="submit" class="btn btn-primary w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>लग इन गर्नुहोस् (Sign In)
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
                             </button>
                         </form>
                         
                         <div class="text-center">
-                            <p class="mb-0">अझै आवेदन दिनु भएको छैन? (Haven't applied yet?) 
+                            <p class="mb-0">Haven't applied yet?
                                 <a href="register.php" class="text-decoration-none text-primary fw-bold">Apply Now</a>
                             </p>
                             <hr class="my-3">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
-                                <strong>महत्वपूर्ण:</strong> शिक्षा मित्र मा लग इन गर्नको लागि तपाईंको आवेदन पहिले स्वीकृत हुनुपर्छ।<br>
-                                <small>To login to Shiksha Mitra, your application must first be approved by our team. You will receive your Special ID via email once approved.</small>
+                                <strong>Important:</strong> To login to Shiksha Mitra, your application must first be approved by our team. You will receive your Special ID via email once approved.
                             </div>
                         </div>
                     </div>
@@ -132,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="text-center mt-3">
                     <a href="../index.php" class="text-decoration-none text-primary">
-                        <i class="fas fa-arrow-left me-2"></i>घर फर्किनुहोस् (Back to Home)
+                        <i class="fas fa-arrow-left me-2"></i>Back to Home
                     </a>
                 </div>
             </div>
