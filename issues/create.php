@@ -84,7 +84,7 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
         <div class="container">
             <a class="navbar-brand" href="../index.php">
                 <i class="fas fa-graduation-cap me-2"></i>
-                Shiksha Mitra <span class="nepali-text">शिक्षा मित्र</span>
+                Shiksha Mitra
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -125,8 +125,7 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                     <div class="card-header bg-primary text-white text-center py-3">
                         <h3 class="mb-0">
                             <i class="fas fa-plus-circle me-2"></i>
-                            नयाँ शैक्षिक समस्या पोस्ट गर्नुहोस्<br>
-                            <small class="opacity-75">Post New Educational Issue</small>
+                            Post New Educational Issue
                         </h3>
                     </div>
                     
@@ -143,7 +142,7 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                         
                         <form method="POST" action="" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label for="title" class="form-label">समस्याको शीर्षक (Issue Title)</label>
+                                <label for="title" class="form-label">Issue Title</label>
                                 <input type="text" class="form-control" id="title" name="title" 
                                        placeholder="e.g., School lacks proper library facilities"
                                        value="<?php echo htmlspecialchars($_POST['title'] ?? ''); ?>" required>
@@ -151,7 +150,7 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                             </div>
                             
                             <div class="mb-3">
-                                <label for="description" class="form-label">विस्तृत विवरण (Detailed Description)</label>
+                                <label for="description" class="form-label">Detailed Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="6" 
                                           placeholder="Provide detailed information about the educational issue, its impact, and possible solutions..." required><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
                                 <small class="form-text text-muted">Explain the problem and its impact on education</small>
@@ -165,10 +164,10 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                             
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-paper-plane me-2"></i>समस्या पोस्ट गर्नुहोस् (Post Issue)
+                                    <i class="fas fa-paper-plane me-2"></i>Post Issue
                                 </button>
                                 <a href="../index.php" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>रद्द गर्नुहोस् (Cancel)
+                                    <i class="fas fa-times me-2"></i>Cancel
                                 </a>
                             </div>
                         </form>
@@ -179,15 +178,15 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                 <div class="card mt-4 border-info">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>राम्रो समस्या लेख्नका लागि सुझाव (Tips for Better Issues)
+                            <i class="fas fa-lightbulb me-2"></i>Tips for Better Issues
                         </h5>
                     </div>
                     <div class="card-body">
                         <ul class="mb-0">
-                            <li><strong>स्थान र समस्याको प्रकृति स्पष्ट पार्नुहोस्</strong><br><small>Be specific about the location and nature of the educational problem</small></li>
-                            <li><strong>अन्यले बुझ्न सकून् गरी विवरण दिनुहोस्</strong><br><small>Include relevant details that help others understand the issue</small></li>
-                            <li><strong>सम्भव भए तस्बिर पनि थप्नुहोस्</strong><br><small>Add photos when possible to provide visual context</small></li>
-                            <li><strong>सफा र स्पष्ट भाषा प्रयोग गर्नुहोस्</strong><br><small>Use clear, descriptive language</small></li>
+                            <li>Be specific about the location and nature of the problem</li>
+                            <li>Include relevant details that help others understand the issue</li>
+                            <li>Add photos when possible to provide visual context</li>
+                            <li>Use clear, concise language</li>
                         </ul>
                     </div>
                 </div>

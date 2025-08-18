@@ -54,7 +54,7 @@ if (isLoggedIn()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shiksha Mitra - शिक्षा मित्र</title>
+    <title>Shiksha Mitra</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
@@ -65,7 +65,7 @@ if (isLoggedIn()) {
         <div class="container">
             <a class="navbar-brand" href="index.php">
                 <i class="fas fa-graduation-cap me-2"></i>
-                Shiksha Mitra <span class="nepali-text">शिक्षा मित्र</span>
+                Shiksha Mitra
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -87,7 +87,7 @@ if (isLoggedIn()) {
                 <!-- Search Bar - Only for logged in users -->
                 <?php if (isLoggedIn()): ?>
                     <form class="d-flex me-3" method="GET" action="">
-                        <input class="form-control me-2" type="search" name="search" placeholder="समस्या खोज्नुहोस्... (Search issues)" 
+                        <input class="form-control me-2" type="search" name="search" placeholder="Search issues" 
                                value="<?php echo htmlspecialchars($search); ?>">
                         <button class="btn btn-outline-light" type="submit">
                             <i class="fas fa-search"></i>
@@ -125,10 +125,9 @@ if (isLoggedIn()) {
     <div class="hero-section">
         <div class="container text-center">
             <h1 class="display-4 fw-bold text-white mb-3">
-                शिक्षा मित्र - Education Community
+                Shiksha Mitra - Education Community
             </h1>
             <p class="lead text-white-50 mb-4">
-                शिक्षाको समस्या साझा गर्नुहोस्, मतदान गर्नुहोस्, र सँगै समाधान खोजौं<br>
                 Share educational issues, vote on priorities, and work together for better education
             </p>
             <?php if (isLoggedIn()): ?>
@@ -277,8 +276,8 @@ if (isLoggedIn()) {
                         <div class="card-body p-5 text-center">
                             <div class="mb-4">
                                 <i class="fas fa-graduation-cap fa-4x text-primary mb-3"></i>
-                                <h2 class="card-title h1 mb-3">स्वागत छ Shiksha Mitra मा!</h2>
-                                <p class="lead text-muted">Welcome to Shiksha Mitra - Your Education Community Partner</p>
+                                <h2 class="card-title h1 mb-3">Welcome to Shiksha Mitra</h2>
+                                <p class="lead text-muted">Your Education Community Partner</p>
                             </div>
                             
                             <div class="row text-start">
@@ -286,28 +285,28 @@ if (isLoggedIn()) {
                                     <div class="feature-item">
                                         <i class="fas fa-comments fa-2x text-primary mb-2"></i>
                                         <h5>Share Educational Issues</h5>
-                                        <p class="text-muted">शिक्षा सम्बन्धी समस्याहरू साझा गर्नुहोस् र समुदायसँग छलफल गर्नुहोस्।</p>
+                                        <p class="text-muted">Post problems you see in your schools and community.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <div class="feature-item">
                                         <i class="fas fa-vote-yea fa-2x text-primary mb-2"></i>
                                         <h5>Vote on Priorities</h5>
-                                        <p class="text-muted">महत्वपूर्ण शैक्षिक मुद्दाहरूमा मतदान गर्नुहोस् र प्राथमिकता तय गर्नुहोस्।</p>
+                                        <p class="text-muted">Help the community prioritize what matters most.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <div class="feature-item">
                                         <i class="fas fa-users fa-2x text-primary mb-2"></i>
                                         <h5>Community Collaboration</h5>
-                                        <p class="text-muted">शिक्षकहरू, अभिभावकहरू र विद्यार्थीहरूसँग मिलेर काम गर्नुहोस्।</p>
+                                        <p class="text-muted">Work with teachers, parents, and students.</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <div class="feature-item">
                                         <i class="fas fa-lightbulb fa-2x text-primary mb-2"></i>
                                         <h5>Find Solutions</h5>
-                                        <p class="text-muted">शैक्षिक चुनौतीहरूका लागि सामूहिक समाधान खोज्नुहोस्।</p>
+                                        <p class="text-muted">Co-create practical solutions together.</p>
                                     </div>
                                 </div>
                             </div>
@@ -315,8 +314,7 @@ if (isLoggedIn()) {
                             <div class="mt-4 pt-4 border-top">
                                 <h4 class="text-primary mb-3">Join Our Education Community Today!</h4>
                                 <p class="text-muted mb-4">
-                                    शिक्षा मित्र मा सामेल भएर नेपालको शिक्षा क्षेत्रमा सकारात्मक परिवर्तन ल्याउनुहोस्।<br>
-                                    <em>To access educational issues and participate in discussions, please create an account.</em>
+                                    To access educational issues and participate in discussions, please create an account.
                                 </p>
                                 <div class="d-grid gap-2 d-md-block">
                                     <a href="auth/register.php" class="btn btn-primary btn-lg px-4 me-2">
@@ -339,8 +337,8 @@ if (isLoggedIn()) {
         <div class="container text-center py-4">
             <p class="text-muted mb-0">
                 <i class="fas fa-heart text-danger me-1"></i>
-                शिक्षा मित्र - Built for educational community engagement and problem-solving<br>
-                <small>Empowering Nepal's education system through community collaboration</small>
+                Built for educational community engagement and problem-solving<br>
+                <small>Empowering education through community collaboration</small>
             </p>
         </div>
     </footer>

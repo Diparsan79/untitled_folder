@@ -163,21 +163,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <?php if (!empty($errors)): ?>
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger alert-minimal">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>कृपया निम्न त्रुटिहरू सच्याउनुहोस्:</strong>
-                                <ul class="mb-0 mt-2">
-                                    <?php foreach ($errors as $error): ?>
-                                        <li><?php echo $error; ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
+                                Please fix the highlighted fields and try again.
                             </div>
                         <?php endif; ?>
                         
                         <?php if (!empty($success_message)): ?>
-                            <div class="alert alert-success">
+                            <div class="alert alert-success alert-minimal">
                                 <i class="fas fa-check-circle me-2"></i>
-                                <?php echo $success_message; ?>
+                                <?php echo htmlspecialchars($success_message); ?>
                             </div>
                         <?php endif; ?>
                         
@@ -185,15 +180,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <!-- Personal Information -->
                             <div class="mb-4">
                                 <h5 class="text-primary mb-3">
-                                    <i class="fas fa-user me-2"></i>व्यक्तिगत जानकारी (Personal Information)
+                                    <i class="fas fa-user me-2"></i>Personal
                                 </h5>
                                 
                             <div class="mb-3">
-                                    <label for="full_name" class="form-label">पूरा नाम (Full Name) *</label>
+                                    <label for="full_name" class="form-label">Full Name *</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user"></i></span>
                                         <input type="text" class="form-control" id="full_name" name="full_name" 
-                                               placeholder="आफ्नो पूरा नाम लेख्नुहोस्"
+                                               placeholder="John Doe"
                                                value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>" required>
                                     </div>
                                 </div>
@@ -209,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="phone" class="form-label">फोन नम्बर (Phone) *</label>
+                                        <label for="phone" class="form-label">Phone *</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-phone"></i></span>
                                             <input type="tel" class="form-control" id="phone" name="phone" 
@@ -220,14 +215,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="occupation" class="form-label">पेशा (Occupation) *</label>
+                                    <label for="occupation" class="form-label">Occupation *</label>
                                     <select class="form-select" id="occupation" name="occupation" required>
-                                        <option value="">आफ्नो पेशा छान्नुहोस् (Select your occupation)</option>
-                                        <option value="teacher" <?php echo ($_POST['occupation'] ?? '') === 'teacher' ? 'selected' : ''; ?>>शिक्षक (Teacher)</option>
-                                        <option value="student" <?php echo ($_POST['occupation'] ?? '') === 'student' ? 'selected' : ''; ?>>विद्यार्थी (Student)</option>
-                                        <option value="parent" <?php echo ($_POST['occupation'] ?? '') === 'parent' ? 'selected' : ''; ?>>अभिभावक (Parent/Guardian)</option>
-                                        <option value="education_officer" <?php echo ($_POST['occupation'] ?? '') === 'education_officer' ? 'selected' : ''; ?>>शिक्षा अधिकारी (Education Officer)</option>
-                                        <option value="community_member" <?php echo ($_POST['occupation'] ?? '') === 'community_member' ? 'selected' : ''; ?>>समुदायिक सदस्य (Community Member)</option>
+                                        <option value="">Select your occupation</option>
+                                        <option value="teacher" <?php echo ($_POST['occupation'] ?? '') === 'teacher' ? 'selected' : ''; ?>>Teacher</option>
+                                        <option value="student" <?php echo ($_POST['occupation'] ?? '') === 'student' ? 'selected' : ''; ?>>Student</option>
+                                        <option value="parent" <?php echo ($_POST['occupation'] ?? '') === 'parent' ? 'selected' : ''; ?>>Parent/Guardian</option>
+                                        <option value="education_officer" <?php echo ($_POST['occupation'] ?? '') === 'education_officer' ? 'selected' : ''; ?>>Education Officer</option>
+                                        <option value="community_member" <?php echo ($_POST['occupation'] ?? '') === 'community_member' ? 'selected' : ''; ?>>Community Member</option>
                                     </select>
                                 </div>
                             </div>

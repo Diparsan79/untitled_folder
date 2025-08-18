@@ -107,13 +107,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         // Generate special ID
         $special_id = generateSpecialID();
         
-        // Update application
-        $stmt = $pdo->prepare("
-            UPDATE user_applications 
-            SET status = 'approved', reviewed_by = ?, review_notes = ?, reviewed_at = NOW(), special_id = ?
-            WHERE id = ?
-        ");
-        $stmt->execute([$_SESSION['admin_id'], $review_notes, $special_id, $application_id]);
+        // Update application (set reviewed_by NULL to avoid FK to users table)
+        $stmt = $pdo->prepare(
+            "UPDATE user_applications SET status = 'approved', reviewed_by = NULL, review_notes = ?, reviewed_at = NOW(), special_id = ? WHERE id = ?"
+        );
+        $stmt->execute([$review_notes, $special_id, $application_id]);
         
         // Create user account
         $stmt = $pdo->prepare("SELECT * FROM user_applications WHERE id = ?");
@@ -123,10 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         if ($app) {
             $username = generateUsername($app['full_name']);
             
-            $stmt = $pdo->prepare("
-                INSERT INTO users (username, email, password, full_name, phone, community_id, special_id, is_verified, verification_date, occupation)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), ?)
-            ");
+            $stmt = $pdo->prepare(
+                "INSERT INTO users (username, email, password, full_name, phone, community_id, special_id, is_verified, verification_date, occupation)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, NOW(), ?)"
+            );
             $stmt->execute([
                 $username, $app['email'], $app['password_hash'], $app['full_name'], 
                 $app['phone'], $app['community_id'], $special_id, $app['occupation']
@@ -144,12 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
         }
     } elseif ($action === 'reject') {
-        $stmt = $pdo->prepare("
-            UPDATE user_applications 
-            SET status = 'rejected', reviewed_by = ?, review_notes = ?, reviewed_at = NOW()
-            WHERE id = ?
-        ");
-        $stmt->execute([$_SESSION['admin_id'], $review_notes, $application_id]);
+        $stmt = $pdo->prepare(
+            "UPDATE user_applications SET status = 'rejected', reviewed_by = NULL, review_notes = ?, reviewed_at = NOW() WHERE id = ?"
+        );
+        $stmt->execute([$review_notes, $application_id]);
         
         // Send rejection email
         $stmt = $pdo->prepare("SELECT full_name, email FROM user_applications WHERE id = ?");
@@ -172,25 +168,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // Get pending applications
 $pdo = getDBConnection();
-$stmt = $pdo->prepare("
-    SELECT ua.*, c.name as community_name, c.district, c.province
+$stmt = $pdo->prepare(
+    "SELECT ua.*, c.name as community_name, c.district, c.province
     FROM user_applications ua
     LEFT JOIN communities c ON ua.community_id = c.id
     WHERE ua.status = 'pending'
-    ORDER BY ua.applied_at ASC
-");
+    ORDER BY ua.applied_at ASC"
+);
 $stmt->execute();
 $pending_applications = $stmt->fetchAll();
 
 // Get statistics
-$stmt = $pdo->prepare("
-    SELECT 
+$stmt = $pdo->prepare(
+    "SELECT 
         COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
         COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved_count,
         COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_count,
         COUNT(*) as total_count
-    FROM user_applications
-");
+    FROM user_applications"
+);
 $stmt->execute();
 $stats = $stmt->fetch();
 
