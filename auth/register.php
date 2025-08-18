@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Email is required";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors[] = "Please enter a valid email address";
+    } elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
+        $errors[] = "Please enter a properly formatted email address";
     }
     
     if (empty($password)) {
@@ -69,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Community Voting</title>
+    <title>Register - Shiksha Mitra</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
@@ -81,9 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="card shadow">
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
-                            <i class="fas fa-users fa-3x text-primary"></i>
-                            <h2 class="mt-3">Join Community</h2>
-                            <p class="text-muted">Help make your community better</p>
+                            <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                            <h2 class="mt-3">Shiksha Mitra मा सामेल हुनुहोस्</h2>
+                            <p class="text-muted">Join our educational community</p>
+                            <p class="small text-muted">Help improve Nepal's education system together</p>
                         </div>
                         
                         <?php if (!empty($errors)): ?>
@@ -132,21 +135,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             
                             <button type="submit" class="btn btn-primary w-100 mb-3">
-                                <i class="fas fa-user-plus me-2"></i>Create Account
+                                <i class="fas fa-user-plus me-2"></i>खाता बनाउनुहोस् (Create Account)
                             </button>
                         </form>
                         
                         <div class="text-center">
-                            <p class="mb-0">Already have an account? 
-                                <a href="login.php" class="text-decoration-none">Sign In</a>
+                            <p class="mb-0">पहिले नै खाता छ? (Already have an account?) 
+                                <a href="login.php" class="text-decoration-none text-primary fw-bold">Sign In</a>
                             </p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="text-center mt-3">
-                    <a href="../index.php" class="text-decoration-none">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Home
+                    <a href="../index.php" class="text-decoration-none text-primary">
+                        <i class="fas fa-arrow-left me-2"></i>घर फर्किनुहोस् (Back to Home)
                     </a>
                 </div>
             </div>

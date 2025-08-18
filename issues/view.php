@@ -22,26 +22,25 @@ if (!$issue) {
     redirect('../index.php', 'Issue not found.', 'error');
 }
 
-// Handle comment submission
+// Handle comment submission - only for logged in users
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['comment'])) {
+    if (!isLoggedIn()) {
+        redirect('../auth/login.php', 'Please login to post comments.', 'warning');
+    }
+    
     $comment = sanitizeInput($_POST['comment']);
     
     if (empty($comment)) {
         $errors[] = "Comment cannot be empty";
+    } elseif (strlen($comment) < 5) {
+        $errors[] = "Comment must be at least 5 characters long";
     } else {
-        $user_id = isLoggedIn() ? $_SESSION['user_id'] : null;
-        $username = isLoggedIn() ? $_SESSION['username'] : 'Guest';
-        
-        if (isLoggedIn()) {
-            $stmt = $pdo->prepare("INSERT INTO comments (issue_id, user_id, comment) VALUES (?, ?, ?)");
-            $stmt->execute([$issue_id, $user_id, $comment]);
+        $stmt = $pdo->prepare("INSERT INTO comments (issue_id, user_id, comment) VALUES (?, ?, ?)");
+        if ($stmt->execute([$issue_id, $_SESSION['user_id'], $comment])) {
+            redirect("view.php?id=$issue_id", 'Comment added successfully!', 'success');
         } else {
-            // For anonymous users, store as guest comment
-            $stmt = $pdo->prepare("INSERT INTO comments (issue_id, user_id, comment) VALUES (?, NULL, ?)");
-            $stmt->execute([$issue_id, $comment]);
+            $errors[] = "Failed to add comment. Please try again.";
         }
-        
-        redirect("view.php?id=$issue_id", 'Comment added successfully!', 'success');
     }
 }
 
@@ -68,7 +67,7 @@ if (isLoggedIn()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($issue['title']); ?> - Community Voting</title>
+    <title><?php echo htmlspecialchars($issue['title']); ?> - Shiksha Mitra</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
@@ -77,7 +76,7 @@ if (isLoggedIn()) {
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="../index.php">
-                <i class="fas fa-vote-yea me-2"></i>CommunityVote
+                <i class="fas fa-graduation-cap me-2"></i>Shiksha Mitra <span class="nepali-text">शिक्षा मित्र</span>
             </a>
             <div class="navbar-nav ms-auto">
                 <a class="nav-link" href="../index.php">Home</a>
@@ -166,22 +165,41 @@ if (isLoggedIn()) {
                     
                     <div class="card-body">
                         <!-- Add Comment Form -->
-                        <form method="POST" action="" class="mb-4">
-                            <div class="mb-3">
-                                <label for="comment" class="form-label">
-                                    <?php if (isLoggedIn()): ?>
-                                        Add your comment
-                                    <?php else: ?>
-                                        Add comment as Guest
-                                    <?php endif; ?>
-                                </label>
-                                <textarea class="form-control" id="comment" name="comment" rows="3" 
-                                          placeholder="Share your thoughts, suggestions, or updates about this issue..." required></textarea>
+                        <?php if (isLoggedIn()): ?>
+                            <?php if (!empty($errors)): ?>
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        <?php foreach ($errors as $error): ?>
+                                            <li><?php echo $error; ?></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <form method="POST" action="" class="mb-4">
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">
+                                        आफ्नो विचार राख्नुहोस् (Add your comment)
+                                    </label>
+                                    <textarea class="form-control" id="comment" name="comment" rows="3" 
+                                              placeholder="Share your thoughts, suggestions, or updates about this educational issue..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>टिप्पणी पोस्ट गर्नुहोस् (Post Comment)
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>टिप्पणी गर्न लगिन गर्नुपर्छ।</strong> (Please login to post comments)<br>
+                                <a href="../auth/login.php" class="btn btn-primary btn-sm mt-2">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Login
+                                </a>
+                                <a href="../auth/register.php" class="btn btn-outline-primary btn-sm mt-2 ms-2">
+                                    <i class="fas fa-user-plus me-1"></i>Register
+                                </a>
                             </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-paper-plane me-2"></i>Post Comment
-                            </button>
-                        </form>
+                        <?php endif; ?>
                         
                         <!-- Comments List -->
                         <?php if (empty($comments)): ?>

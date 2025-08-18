@@ -73,7 +73,7 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post New Issue - Community Voting</title>
+    <title>Post New Issue - Shiksha Mitra</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
@@ -83,8 +83,8 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="../index.php">
-                <i class="fas fa-vote-yea me-2"></i>
-                CommunityVote
+                <i class="fas fa-graduation-cap me-2"></i>
+                Shiksha Mitra <span class="nepali-text">शिक्षा मित्र</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -125,7 +125,8 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                     <div class="card-header bg-primary text-white text-center py-3">
                         <h3 class="mb-0">
                             <i class="fas fa-plus-circle me-2"></i>
-                            Post New Community Issue
+                            नयाँ शैक्षिक समस्या पोस्ट गर्नुहोस्<br>
+                            <small class="opacity-75">Post New Educational Issue</small>
                         </h3>
                     </div>
                     
@@ -142,14 +143,18 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                         
                         <form method="POST" action="" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label for="title" class="form-label">Issue Title</label>
+                                <label for="title" class="form-label">समस्याको शीर्षक (Issue Title)</label>
                                 <input type="text" class="form-control" id="title" name="title" 
+                                       placeholder="e.g., School lacks proper library facilities"
                                        value="<?php echo htmlspecialchars($_POST['title'] ?? ''); ?>" required>
+                                <small class="form-text text-muted">Describe the educational issue briefly</small>
                             </div>
                             
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="6" required><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
+                                <label for="description" class="form-label">विस्तृत विवरण (Detailed Description)</label>
+                                <textarea class="form-control" id="description" name="description" rows="6" 
+                                          placeholder="Provide detailed information about the educational issue, its impact, and possible solutions..." required><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
+                                <small class="form-text text-muted">Explain the problem and its impact on education</small>
                             </div>
                             
                             <div class="mb-4">
@@ -159,8 +164,12 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                             </div>
                             
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg">Post Issue</button>
-                                <a href="../index.php" class="btn btn-outline-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>समस्या पोस्ट गर्नुहोस् (Post Issue)
+                                </button>
+                                <a href="../index.php" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>रद्द गर्नुहोस् (Cancel)
+                                </a>
                             </div>
                         </form>
                     </div>
@@ -170,15 +179,15 @@ if ($image && $image['error'] === UPLOAD_ERR_OK) {
                 <div class="card mt-4 border-info">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>Tips for Better Issues
+                            <i class="fas fa-lightbulb me-2"></i>राम्रो समस्या लेख्नका लागि सुझाव (Tips for Better Issues)
                         </h5>
                     </div>
                     <div class="card-body">
                         <ul class="mb-0">
-                            <li>Be specific about the location and nature of the problem</li>
-                            <li>Include relevant details that help others understand the issue</li>
-                            <li>Add photos when possible to provide visual context</li>
-                            <li>Use clear, descriptive language</li>
+                            <li><strong>स्थान र समस्याको प्रकृति स्पष्ट पार्नुहोस्</strong><br><small>Be specific about the location and nature of the educational problem</small></li>
+                            <li><strong>अन्यले बुझ्न सकून् गरी विवरण दिनुहोस्</strong><br><small>Include relevant details that help others understand the issue</small></li>
+                            <li><strong>सम्भव भए तस्बिर पनि थप्नुहोस्</strong><br><small>Add photos when possible to provide visual context</small></li>
+                            <li><strong>सफा र स्पष्ट भाषा प्रयोग गर्नुहोस्</strong><br><small>Use clear, descriptive language</small></li>
                         </ul>
                     </div>
                 </div>

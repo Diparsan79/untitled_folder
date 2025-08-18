@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Community Voting</title>
+    <title>Login - Shiksha Mitra</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/style.css" rel="stylesheet">
@@ -53,9 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="card shadow">
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
-                            <i class="fas fa-sign-in-alt fa-3x text-primary"></i>
-                            <h2 class="mt-3">Welcome Back</h2>
-                            <p class="text-muted">Sign in to your account</p>
+                            <i class="fas fa-graduation-cap fa-3x text-primary"></i>
+                            <h2 class="mt-3">फेरि आउनुभयो! Welcome Back</h2>
+                            <p class="text-muted">Sign in to your Shiksha Mitra account</p>
+                            <p class="small text-muted">Access educational community discussions</p>
                         </div>
                         
                         <?php if (!empty($errors)): ?>
@@ -87,21 +88,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             
                             <button type="submit" class="btn btn-primary w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                <i class="fas fa-sign-in-alt me-2"></i>लग इन गर्नुहोस् (Sign In)
                             </button>
                         </form>
                         
                         <div class="text-center">
-                            <p class="mb-0">Don't have an account? 
-                                <a href="register.php" class="text-decoration-none">Sign Up</a>
+                            <p class="mb-0">खाता छैन? (Don't have an account?) 
+                                <a href="register.php" class="text-decoration-none text-primary fw-bold">Sign Up</a>
                             </p>
                         </div>
                     </div>
                 </div>
                 
                 <div class="text-center mt-3">
-                    <a href="../index.php" class="text-decoration-none">
-                        <i class="fas fa-arrow-left me-2"></i>Back to Home
+                    <a href="../index.php" class="text-decoration-none text-primary">
+                        <i class="fas fa-arrow-left me-2"></i>घर फर्किनुहोस् (Back to Home)
                     </a>
                 </div>
             </div>
