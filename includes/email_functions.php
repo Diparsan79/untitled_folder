@@ -4,6 +4,34 @@
  * Simple email system for sending Special IDs and notifications
  */
 
+// Check if we're in local development mode
+function isLocalDevelopment() {
+    return ($_SERVER['HTTP_HOST'] === 'localhost' || 
+            strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false || 
+            strpos($_SERVER['HTTP_HOST'], '.local') !== false);
+}
+
+// Show email notification for local development
+function showLocalEmailNotification($email, $subject, $type = 'info') {
+    $colors = [
+        'success' => ['bg' => '#10b981', 'title' => '✅ EMAIL SENT'],
+        'info' => ['bg' => '#7c3aed', 'title' => '📧 EMAIL SENT'], 
+        'warning' => ['bg' => '#f59e0b', 'title' => '⚠️ EMAIL SENT'],
+        'error' => ['bg' => '#ef4444', 'title' => '❌ EMAIL SENT']
+    ];
+    
+    $color = $colors[$type] ?? $colors['info'];
+    
+    echo "<div style='position: fixed; top: 20px; right: 20px; z-index: 9999; background: white; border: 3px solid {$color['bg']}; border-radius: 12px; padding: 20px; max-width: 400px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); font-family: Arial, sans-serif;'>";
+    echo "<h6 style='color: {$color['bg']}; margin: 0 0 10px 0; font-size: 14px; font-weight: bold;'>{$color['title']} (Local Mode)</h6>";
+    echo "<p style='margin: 5px 0; font-size: 12px; color: #333;'><strong>To:</strong> " . htmlspecialchars($email) . "</p>";
+    echo "<p style='margin: 5px 0; font-size: 12px; color: #333;'><strong>Subject:</strong> " . htmlspecialchars($subject) . "</p>";
+    echo "<p style='margin: 10px 0 5px 0; font-size: 11px; color: #666; font-style: italic;'>Email would be sent in production mode</p>";
+    echo "<button onclick='this.parentElement.style.display=\"none\"' style='background: {$color['bg']}; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; float: right; font-size: 11px;'>Close</button>";
+    echo "<div style='clear: both;'></div>";
+    echo "</div>";
+}
+
 function sendSpecialIDEmail($email, $full_name, $special_id, $community_name) {
     $subject = "🎉 Shiksha Mitra - Your Application Approved! / आवेदन स्वीकृत भयो!";
     
@@ -89,6 +117,12 @@ function sendSpecialIDEmail($email, $full_name, $special_id, $community_name) {
     $headers .= "From: Shiksha Mitra <noreply@shiksha-mitra.np>" . "\r\n";
     $headers .= "Reply-To: support@shiksha-mitra.np" . "\r\n";
     
+    // Check if we're in local development mode
+    if (isLocalDevelopment()) {
+        showLocalEmailNotification($email, $subject, 'success');
+        return true; // Simulate successful sending
+    }
+    
     // In production, use a proper email service like PHPMailer, SendGrid, etc.
     // For now, using basic mail() function
     return mail($email, $subject, $message, $headers);
@@ -152,6 +186,12 @@ function sendRejectionEmail($email, $full_name, $reason = '') {
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
     $headers .= "From: Shiksha Mitra <noreply@shiksha-mitra.np>" . "\r\n";
     $headers .= "Reply-To: support@shiksha-mitra.np" . "\r\n";
+    
+    // Check if we're in local development mode
+    if (isLocalDevelopment()) {
+        showLocalEmailNotification($email, $subject, 'error');
+        return true; // Simulate successful sending
+    }
     
     return mail($email, $subject, $message, $headers);
 }
@@ -227,6 +267,12 @@ function sendApplicationConfirmationEmail($email, $full_name) {
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
     $headers .= "From: Shiksha Mitra <noreply@shiksha-mitra.np>" . "\r\n";
     $headers .= "Reply-To: support@shiksha-mitra.np" . "\r\n";
+    
+    // Check if we're in local development mode
+    if (isLocalDevelopment()) {
+        showLocalEmailNotification($email, $subject, 'info');
+        return true; // Simulate successful sending
+    }
     
     return mail($email, $subject, $message, $headers);
 }
