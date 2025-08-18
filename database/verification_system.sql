@@ -1,3 +1,5 @@
+USE community_voting;
+
 -- Shiksha Mitra Verification System Database Structure
 -- Enhanced user verification with proof of residence and community-based authentication
 
@@ -10,6 +12,7 @@ CREATE TABLE IF NOT EXISTS communities (
     postal_code VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Insert sample Nepali communities
 INSERT INTO communities (name, district, province, postal_code) VALUES
