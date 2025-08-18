@@ -85,10 +85,91 @@ body {
     gap: 0.5rem;
 }
 
-.navbar-brand .nepali-text {
-    font-size: 0.7em;
-    opacity: 0.8;
-    white-space: nowrap;
+    .navbar-brand .nepali-text {
+        font-size: 0.7em;
+        opacity: 0.8;
+        white-space: nowrap;
+    }
+}
+
+/* Nepali Cultural Elements */
+.nepali-pattern {
+    background-image: radial-gradient(circle at 1px 1px, rgba(124, 58, 237, 0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+}
+
+/* Traditional Nepali Colors Integration */
+.nepali-flag-accent {
+    border-left: 4px solid var(--nepali-red);
+    border-right: 4px solid var(--nepali-blue);
+}
+
+/* Enhanced form styling with Nepali touch */
+.form-control:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 0.2rem rgba(124, 58, 237, 0.25);
+}
+
+/* Nepali typography styling */
+.nepali-heading {
+    font-family: 'Mukti', 'Noto Sans Devanagari', sans-serif;
+    font-weight: 600;
+    color: var(--primary-purple);
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Cultural decoration elements */
+.mandala-decoration::before {
+    content: '॥';
+    color: var(--primary-purple);
+    font-size: 1.5em;
+    opacity: 0.3;
+    margin-right: 0.5rem;
+}
+
+.mandala-decoration::after {
+    content: '॥';
+    color: var(--primary-purple);
+    font-size: 1.5em;
+    opacity: 0.3;
+    margin-left: 0.5rem;
+}
+
+/* Enhanced card styling with Nepali elements */
+.nepali-card {
+    border-top: 3px solid var(--primary-purple);
+    position: relative;
+    overflow: hidden;
+}
+
+.nepali-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--nepali-red) 0%, var(--primary-purple) 50%, var(--nepali-blue) 100%);
+}
+
+/* Educational theme colors */
+.education-primary {
+    color: var(--primary-purple);
+}
+
+.education-secondary {
+    color: var(--secondary-purple);
+}
+
+/* Responsive Nepali text */
+@media (max-width: 576px) {
+    .nepali-text {
+        font-size: 0.7em;
+    }
+    
+    .nepali-heading {
+        font-size: 1.2em;
+    }
 }
 
 .navbar-nav .nav-link {

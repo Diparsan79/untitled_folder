@@ -84,14 +84,16 @@ if (isLoggedIn()) {
                     <?php endif; ?>
                 </ul>
                 
-                <!-- Search Bar -->
-                <form class="d-flex me-3" method="GET" action="">
-                    <input class="form-control me-2" type="search" name="search" placeholder="Search issues..." 
-                           value="<?php echo htmlspecialchars($search); ?>">
-                    <button class="btn btn-outline-light" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
+                <!-- Search Bar - Only for logged in users -->
+                <?php if (isLoggedIn()): ?>
+                    <form class="d-flex me-3" method="GET" action="">
+                        <input class="form-control me-2" type="search" name="search" placeholder="समस्या खोज्नुहोस्... (Search issues)" 
+                               value="<?php echo htmlspecialchars($search); ?>">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                <?php endif; ?>
                 
                 <!-- User Menu -->
                 <ul class="navbar-nav">
