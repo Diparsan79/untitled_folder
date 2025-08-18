@@ -180,44 +180,185 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         <?php endif; ?>
                         
-                        <form method="POST" action="">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="username" name="username" 
-                                           value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
+                        <form method="POST" action="" enctype="multipart/form-data">
+                            <!-- Personal Information -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-user me-2"></i>व्यक्तिगत जानकारी (Personal Information)
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="full_name" class="form-label">पूरा नाम (Full Name) *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="full_name" name="full_name" 
+                                               placeholder="आफ्नो पूरा नाम लेख्नुहोस्"
+                                               value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email Address *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="email" name="email" 
+                                                   placeholder="your.email@example.com"
+                                                   value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">फोन नम्बर (Phone) *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                                   placeholder="98XXXXXXXX"
+                                                   value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="occupation" class="form-label">पेशा (Occupation) *</label>
+                                    <select class="form-select" id="occupation" name="occupation" required>
+                                        <option value="">आफ्नो पेशा छान्नुहोस् (Select your occupation)</option>
+                                        <option value="teacher" <?php echo ($_POST['occupation'] ?? '') === 'teacher' ? 'selected' : ''; ?>>शिक्षक (Teacher)</option>
+                                        <option value="student" <?php echo ($_POST['occupation'] ?? '') === 'student' ? 'selected' : ''; ?>>विद्यार्थी (Student)</option>
+                                        <option value="parent" <?php echo ($_POST['occupation'] ?? '') === 'parent' ? 'selected' : ''; ?>>अभिभावक (Parent/Guardian)</option>
+                                        <option value="education_officer" <?php echo ($_POST['occupation'] ?? '') === 'education_officer' ? 'selected' : ''; ?>>शिक्षा अधिकारी (Education Officer)</option>
+                                        <option value="community_member" <?php echo ($_POST['occupation'] ?? '') === 'community_member' ? 'selected' : ''; ?>>समुदायिक सदस्य (Community Member)</option>
+                                    </select>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                    <input type="email" class="form-control" id="email" name="email" 
-                                           value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
+                            <!-- Location Information -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-map-marker-alt me-2"></i>ठेगाना जानकारी (Location Information)
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="community_id" class="form-label">आफ्नो समुदाय/शहर (Your Community/City) *</label>
+                                    <select class="form-select" id="community_id" name="community_id" required>
+                                        <option value="">आफ्नो समुदाय छान्नुहोस् (Select your community)</option>
+                                        <?php 
+                                        $current_province = '';
+                                        foreach ($communities as $community): 
+                                            if ($current_province !== $community['province']):
+                                                if ($current_province !== '') echo '</optgroup>';
+                                                $current_province = $community['province'];
+                                                echo '<optgroup label="' . htmlspecialchars($current_province) . '">';
+                                            endif;
+                                        ?>
+                                            <option value="<?php echo $community['id']; ?>" 
+                                                    <?php echo ($_POST['community_id'] ?? '') == $community['id'] ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($community['name'] . ', ' . $community['district']); ?>
+                                            </option>
+                                        <?php 
+                                        endforeach; 
+                                        if ($current_province !== '') echo '</optgroup>';
+                                        ?>
+                                    </select>
+                                    <small class="form-text text-muted">कृपया आफ्नो वास्तविक निवासको समुदाय मात्र छान्नुहोस्</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="address_detail" class="form-label">विस्तृत ठेगाना (Detailed Address) *</label>
+                                    <textarea class="form-control" id="address_detail" name="address_detail" rows="3" 
+                                              placeholder="वार्ड नम्बर, टोल, नजिकको चिनारी (Ward number, tole, nearby landmarks)" required><?php echo htmlspecialchars($_POST['address_detail'] ?? ''); ?></textarea>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input type="password" class="form-control" id="password" name="password" required>
+                            <!-- Document Verification -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-file-upload me-2"></i>प्रमाणिकरण कागजात (Document Verification)
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="document_type" class="form-label">प्रमाण कागजातको प्रकार (Document Type) *</label>
+                                    <select class="form-select" id="document_type" name="document_type" required>
+                                        <option value="">कागजातको प्रकार छान्नुहोस् (Select document type)</option>
+                                        <option value="citizenship" <?php echo ($_POST['document_type'] ?? '') === 'citizenship' ? 'selected' : ''; ?>>नागरिकता प्रमाणपत्र (Citizenship Certificate)</option>
+                                        <option value="utility_bill" <?php echo ($_POST['document_type'] ?? '') === 'utility_bill' ? 'selected' : ''; ?>>बिजुली/पानीको बिल (Utility Bill)</option>
+                                        <option value="rental_agreement" <?php echo ($_POST['document_type'] ?? '') === 'rental_agreement' ? 'selected' : ''; ?>>भाडा सम्झौता (Rental Agreement)</option>
+                                        <option value="bank_statement" <?php echo ($_POST['document_type'] ?? '') === 'bank_statement' ? 'selected' : ''; ?>>ब्यांक स्टेटमेन्ट (Bank Statement)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="proof_document" class="form-label">निवास प्रमाण कागजात (Proof of Residence) *</label>
+                                    <input type="file" class="form-control" id="proof_document" name="proof_document" 
+                                           accept=".jpg,.jpeg,.png,.pdf" required>
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        JPEG, PNG, वा PDF फाइल (5MB भन्दा कम) | Clear photo/scan required
+                                    </small>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="confirm_password" class="form-label">Confirm Password</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            <!-- Application Details -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-edit me-2"></i>आवेदन विवरण (Application Details)
+                                </h5>
+                                
+                                <div class="mb-3">
+                                    <label for="motivation" class="form-label">शिक्षा मित्रमा किन सामेल हुन चाहनुहुन्छ? *</label>
+                                    <textarea class="form-control" id="motivation" name="motivation" rows="4" 
+                                              placeholder="शिक्षा क्षेत्रमा तपाईंको योगदान, समुदायमा देखिएका समस्याहरू, र कसरी मद्दत गर्न चाहनुहुन्छ भन्नुहोस्..." required><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
+                                    <small class="form-text text-muted">Why do you want to join Shiksha Mitra? How can you contribute to educational improvement?</small>
                                 </div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary w-100 mb-3">
-                                <i class="fas fa-user-plus me-2"></i>खाता बनाउनुहोस् (Create Account)
-                            </button>
+                            <!-- Password Section -->
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-lock me-2"></i>पासवर्ड सेट गर्नुहोस् (Set Password)
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">Password *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                            <input type="password" class="form-control" id="password" name="password" 
+                                                   placeholder="कमतिमा 8 अक्षर" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm_password" class="form-label">Confirm Password *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
+                                                   placeholder="पासवर्ड पुन: लेख्नुहोस्" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Terms and Submit -->
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        म सहमत छु कि मैले प्रदान गरेको जानकारी सत्य छ र शिक्षा मित्रको नियम र सर्तहरू मान्छु। *<br>
+                                        <small class="text-muted">I agree that the information provided is true and I accept Shiksha Mitra's terms and conditions.</small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <?php if (empty($success_message)): ?>
+                                <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
+                                    <i class="fas fa-paper-plane me-2"></i>आवेदन पेश गर्नुहोस् (Submit Application)
+                                </button>
+                            <?php else: ?>
+                                <div class="text-center">
+                                    <a href="../index.php" class="btn btn-success btn-lg">
+                                        <i class="fas fa-home me-2"></i>घर फर्किनुहोस् (Go to Home)
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </form>
                         
                         <div class="text-center">

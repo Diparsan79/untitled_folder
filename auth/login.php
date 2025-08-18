@@ -9,17 +9,24 @@ if (isLoggedIn()) {
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = sanitizeInput($_POST['username'] ?? '');
+    $special_id = sanitizeInput($_POST['special_id'] ?? '');
     $password = $_POST['password'] ?? '';
     
     // Validation
-    if (empty($username) || empty($password)) {
-        $errors[] = "Both username and password are required";
+    if (empty($special_id) || empty($password)) {
+        $errors[] = "विशेष आइडी र पासवर्ड दुवै आवश्यक छ (Both Special ID and password are required)";
+    } elseif (!preg_match('/^SM[0-9]{6}[A-Z]{2}$/', $special_id)) {
+        $errors[] = "अमान्य विशेष आइडी ढाँचा (Invalid Special ID format)";
     } else {
-        // Authenticate user
+        // Authenticate user with special ID
         $pdo = getDBConnection();
-        $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $username]);
+        $stmt = $pdo->prepare("
+            SELECT u.id, u.username, u.password, u.full_name, u.is_verified, c.name as community_name 
+            FROM users u 
+            LEFT JOIN communities c ON u.community_id = c.id 
+            WHERE u.special_id = ? AND u.is_verified = 1
+        ");
+        $stmt->execute([$special_id]);
         $user = $stmt->fetch();
         
         if ($user && password_verify($password, $user['password'])) {
@@ -27,10 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             startSession();
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['full_name'] = $user['full_name'];
+            $_SESSION['special_id'] = $special_id;
+            $_SESSION['community_name'] = $user['community_name'];
             
-            redirect('../index.php', 'Welcome back, ' . $user['username'] . '!', 'success');
+            // Update last login
+            $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+            $stmt->execute([$user['id']]);
+            
+            redirect('../index.php', 'स्वागत छ ' . $user['full_name'] . '! Welcome back!', 'success');
         } else {
-            $errors[] = "Invalid username/email or password";
+            $errors[] = "गलत विशेष आइडी वा पासवर्ड (Invalid Special ID or password)";
+            
+            // Log failed login attempt
+            error_log("Failed login attempt with Special ID: $special_id from IP: " . $_SERVER['REMOTE_ADDR']);
         }
     }
 }
@@ -71,12 +88,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <form method="POST" action="">
                             <div class="mb-3">
-                                <label for="username" class="form-label">Username or Email</label>
+                                <label for="special_id" class="form-label">विशेष आइडी (Special ID)</label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                    <input type="text" class="form-control" id="username" name="username" 
-                                           value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>" required>
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input type="text" class="form-control" id="special_id" name="special_id" 
+                                           placeholder="SM123456AB" 
+                                           value="<?php echo htmlspecialchars($_POST['special_id'] ?? ''); ?>" 
+                                           style="text-transform: uppercase;" required>
                                 </div>
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    तपाईंलाई इमेल मार्फत पठाइएको विशेष आइडी प्रयोग गर्नुहोस्<br>
+                                    Use the Special ID sent to your email after verification
+                                </small>
                             </div>
                             
                             <div class="mb-3">
@@ -93,9 +117,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </form>
                         
                         <div class="text-center">
-                            <p class="mb-0">खाता छैन? (Don't have an account?) 
-                                <a href="register.php" class="text-decoration-none text-primary fw-bold">Sign Up</a>
+                            <p class="mb-0">अझै आवेदन दिनु भएको छैन? (Haven't applied yet?) 
+                                <a href="register.php" class="text-decoration-none text-primary fw-bold">Apply Now</a>
                             </p>
+                            <hr class="my-3">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>महत्वपूर्ण:</strong> शिक्षा मित्र मा लग इन गर्नको लागि तपाईंको आवेदन पहिले स्वीकृत हुनुपर्छ।<br>
+                                <small>To login to Shiksha Mitra, your application must first be approved by our team. You will receive your Special ID via email once approved.</small>
+                            </div>
                         </div>
                     </div>
                 </div>
