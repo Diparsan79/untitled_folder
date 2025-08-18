@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validation
     if (empty($full_name) || strlen($full_name) < 3) {
-        $errors[] = "पूरा नाम आवश्यक छ (Full name is required, minimum 3 characters)";
+        $errors[] = "Full name is required (min 3 characters)";
     }
     
     if (empty($email)) {
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     if (empty($phone) || !preg_match('/^[0-9+\-\s()]{10,15}$/', $phone)) {
-        $errors[] = "फोन नम्बर आवश्यक छ (Valid phone number is required)";
+        $errors[] = "Valid phone number is required";
     }
     
     if (empty($password) || strlen($password) < 8) {
@@ -55,36 +55,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     if ($community_id <= 0) {
-        $errors[] = "कृपया आफ्नो समुदाय छान्नुहोस् (Please select your community)";
+        $errors[] = "Please select your community";
     }
     
     if (empty($address_detail) || strlen($address_detail) < 10) {
-        $errors[] = "पूरा ठेगाना आवश्यक छ (Complete address is required, minimum 10 characters)";
+        $errors[] = "Complete address is required (min 10 characters)";
     }
     
     if (empty($occupation)) {
-        $errors[] = "पेशा छान्नुहोस् (Please select your occupation)";
+        $errors[] = "Please select your occupation";
     }
     
     if (empty($motivation) || strlen($motivation) < 20) {
-        $errors[] = "शिक्षा मित्रमा सामेल हुने कारण लेख्नुहोस् (Please explain why you want to join Shiksha Mitra, minimum 20 characters)";
+        $errors[] = "Please explain why you want to join (min 20 characters)";
     }
     
     if (empty($document_type)) {
-        $errors[] = "प्रमाण कागजातको प्रकार छान्नुहोस् (Please select document type)";
+        $errors[] = "Please select a document type";
     }
     
     // Validate proof document upload
     if (!$proof_document || $proof_document['error'] !== UPLOAD_ERR_OK) {
-        $errors[] = "निवास प्रमाणको कागजात अपलोड गर्नुहोस् (Please upload proof of residence document)";
+        $errors[] = "Please upload a proof of residence document";
     } else {
         $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
         $max_size = 5 * 1024 * 1024; // 5MB
         
         if (!in_array($proof_document['type'], $allowed_types)) {
-            $errors[] = "केवल JPEG, PNG वा PDF फाइलहरू मात्र अनुमति छ (Only JPEG, PNG, or PDF files are allowed)";
+            $errors[] = "Only JPEG, PNG, or PDF files are allowed";
         } elseif ($proof_document['size'] > $max_size) {
-            $errors[] = "फाइलको साइज 5MB भन्दा कम हुनुपर्छ (File size must be less than 5MB)";
+            $errors[] = "File size must be less than 5MB";
         }
     }
     
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email, $email]);
         
         if ($stmt->fetch()) {
-            $errors[] = "यो इमेल पहिले नै प्रयोग भएको छ (This email is already in use)";
+            $errors[] = "This email is already in use";
         }
     }
     
@@ -128,16 +128,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Send confirmation email
                 sendApplicationConfirmationEmail($email, $full_name);
                 
-                $success_message = "आवेदन सफलतापूर्वक पेश गरियो! (Application submitted successfully!)<br>" .
-                                 "तपाईंको इमेलमा पुष्टिकरण पठाइएको छ। (Confirmation sent to your email)<br>" .
-                                 "हाम्रो टोलीले तपाईंको आवेदन समीक्षा गर्नेछ र 2-3 दिनमा इमेल मार्फत जानकारी दिनेछ।<br>" .
-                                 "<em>Our team will review your application and notify you via email within 2-3 days.</em>";
+                $success_message = "Application submitted. We'll email you after review.";
             } else {
-                $errors[] = "आवेदन पेश गर्न असफल (Failed to submit application). Please try again.";
+                $errors[] = "Failed to submit application. Please try again.";
                 unlink($file_path); // Remove uploaded file on database error
             }
         } else {
-            $errors[] = "फाइल अपलोड गर्न असफल (Failed to upload document). Please try again.";
+            $errors[] = "Failed to upload document. Please try again.";
         }
     }
 }
@@ -156,14 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <div class="row justify-content-center mt-5">
-            <div class="col-md-6 col-lg-4">
+            <div class="col-12 col-xxl-10">
                 <div class="card shadow">
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
                             <i class="fas fa-graduation-cap fa-3x text-primary"></i>
-                            <h2 class="mt-3">Shiksha Mitra मा आवेदन दिनुहोस्</h2>
-                            <p class="text-muted">Apply to join our verified educational community</p>
-                            <p class="small text-muted">सत्यापित शैक्षिक समुदायमा सामेल हुन आवेदन दिनुहोस्</p>
+                            <h2 class="mt-3">Apply to Shiksha Mitra</h2>
+                            <p class="text-muted">Join our verified educational community</p>
                         </div>
                         
                         <?php if (!empty($errors)): ?>
