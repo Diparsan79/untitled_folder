@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Authenticate user with special ID
         $pdo = getDBConnection();
         $stmt = $pdo->prepare("
-            SELECT u.id, u.username, u.password, u.full_name, u.is_verified, c.name as community_name 
+            SELECT u.id, u.username, u.password, u.full_name, u.is_verified, u.is_admin, c.name as community_name 
             FROM users u 
             LEFT JOIN communities c ON u.community_id = c.id 
             WHERE u.special_id = ? AND u.is_verified = 1
@@ -37,11 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['full_name'] = $user['full_name'];
             $_SESSION['special_id'] = $special_id;
             $_SESSION['community_name'] = $user['community_name'];
+            if (!empty($user['is_admin'])) { $_SESSION['is_admin'] = true; }
             
             // Update last login
             $stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
             $stmt->execute([$user['id']]);
             
+            if (!empty($user['is_admin'])) {
+                redirect('../admin/dashboard.php', 'Welcome back, Admin!', 'success');
+            }
             redirect('../index.php', 'Welcome back, ' . $user['full_name'] . '!', 'success');
         } else {
             $errors[] = "Invalid Special ID or password";

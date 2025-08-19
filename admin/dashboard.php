@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
 startSession();
-if (!isset($_SESSION['is_admin'])) { redirect('index.php'); }
+if (empty($_SESSION['is_admin'])) { redirect('index.php','Admin access required','warning'); }
 $pdo = getDBConnection();
 $csrf = generateCSRFToken();
 
@@ -82,8 +82,52 @@ $byCommunity = $pdo->query("SELECT c.name AS community, COUNT(i.id) AS issues_co
         </ul>
       </div>
     </section>
+
+    <section class="grid grid-2" style="margin-top:16px;">
+      <div class="card">
+        <h3>Users</h3>
+        <div class="muted">Search and manage users</div>
+        <form method="get" class="d-flex gap-2" style="margin:8px 0;">
+          <input class="nav-card" type="text" name="q" placeholder="Search username/email">
+          <button class="btn secondary" type="submit">Search</button>
+        </form>
+        <div style="overflow:auto;">
+          <table class="table">
+            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Verified</th><th>Actions</th></tr></thead>
+            <tbody>
+              <?php foreach ($pdo->query('SELECT id, username, email, is_verified FROM users ORDER BY id DESC LIMIT 20') as $u): ?>
+                <tr>
+                  <td><?php echo (int)$u['id']; ?></td>
+                  <td><?php echo htmlspecialchars($u['username']); ?></td>
+                  <td><?php echo htmlspecialchars($u['email']); ?></td>
+                  <td><?php echo (int)$u['is_verified'] ? 'Yes' : 'No'; ?></td>
+                  <td>
+                    <form method="post" class="d-inline">
+                      <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                      <input type="hidden" name="user_id" value="<?php echo (int)$u['id']; ?>">
+                      <button class="btn secondary" name="action" value="suspend_user">Toggle Suspend</button>
+                    </form>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Voting Activity</h3>
+        <canvas id="votesChart" height="120"></canvas>
+      </div>
+    </section>
   </main>
 </div>
 <?php include __DIR__ . '/../partials/footer.php'; ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  var ctx=document.getElementById('votesChart'); if(!ctx) return;
+  var chart=new Chart(ctx,{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Votes',data:[3,5,2,8,6,4,7],borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,.2)',tension:.3,fill:true}]},options:{plugins:{legend:{display:true}},scales:{x:{grid:{display:false}},y:{beginAtZero:true}}}});
+})();
+</script>
 
 

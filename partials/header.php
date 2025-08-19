@@ -22,11 +22,16 @@
 <body>
   <header class="site-header">
     <div style="display:flex;align-items:center;gap:8px;">
-      <button id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+      <button id="sidebarToggle" class="burger" aria-label="Toggle sidebar" aria-controls="primary-sidebar" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
       <h1 class="site-title">Community Voice</h1>
     </div>
     <div class="site-actions">
-      <button id="themeToggle" aria-pressed="false" aria-label="Toggle dark mode">🌙</button>
+      <label class="toggle" title="Toggle dark mode">
+        <input id="themeToggleCheckbox" type="checkbox" aria-pressed="false" aria-label="Toggle dark mode" />
+        <span class="slider"></span>
+      </label>
     </div>
   </header>
   <script defer src="/untitled_folder/public/js/theme.js"></script>

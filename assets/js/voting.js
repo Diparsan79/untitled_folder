@@ -28,7 +28,7 @@ function handleVote(event) {
     button.classList.add('loading');
     
     // Make AJAX request
-    fetch('../api/vote.php', {
+    fetch('/untitled_folder/api/vote.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
