@@ -8,6 +8,7 @@ if (isLoggedIn()) {
 }
 
 $errors = [];
+$fieldErrors = [];
 $success_message = '';
 
 // Get communities for dropdown
@@ -31,60 +32,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validation
     if (empty($full_name) || strlen($full_name) < 3) {
-        $errors[] = "Full name is required (min 3 characters)";
+        $fieldErrors['full_name'] = "Full name is required (min 3 characters)";
+        $errors[] = $fieldErrors['full_name'];
     }
     
     if (empty($email)) {
-        $errors[] = "Email is required";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Please enter a valid email address";
-    } elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
-        $errors[] = "Please enter a properly formatted email address";
+        $fieldErrors['email'] = "Email is required";
+        $errors[] = $fieldErrors['email'];
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
+        $fieldErrors['email'] = "Please enter a valid email address";
+        $errors[] = $fieldErrors['email'];
     }
     
     if (empty($phone) || !preg_match('/^[0-9+\-\s()]{10,15}$/', $phone)) {
-        $errors[] = "Valid phone number is required";
+        $fieldErrors['phone'] = "Valid phone number is required";
+        $errors[] = $fieldErrors['phone'];
     }
     
     if (empty($password) || strlen($password) < 8) {
-        $errors[] = "Password must be at least 8 characters long";
+        $fieldErrors['password'] = "Password must be at least 8 characters long";
+        $errors[] = $fieldErrors['password'];
     }
     
     if ($password !== $confirm_password) {
-        $errors[] = "Passwords do not match";
+        $fieldErrors['confirm_password'] = "Passwords do not match";
+        $errors[] = $fieldErrors['confirm_password'];
     }
     
     if ($community_id <= 0) {
-        $errors[] = "Please select your community";
+        $fieldErrors['community_id'] = "Please select your community";
+        $errors[] = $fieldErrors['community_id'];
     }
     
     if (empty($address_detail) || strlen($address_detail) < 10) {
-        $errors[] = "Complete address is required (min 10 characters)";
+        $fieldErrors['address_detail'] = "Complete address is required (min 10 characters)";
+        $errors[] = $fieldErrors['address_detail'];
     }
     
     if (empty($occupation)) {
-        $errors[] = "Please select your occupation";
+        $fieldErrors['occupation'] = "Please select your occupation";
+        $errors[] = $fieldErrors['occupation'];
     }
     
     if (empty($motivation) || strlen($motivation) < 20) {
-        $errors[] = "Please explain why you want to join (min 20 characters)";
+        $fieldErrors['motivation'] = "Please explain why you want to join (min 20 characters)";
+        $errors[] = $fieldErrors['motivation'];
     }
     
     if (empty($document_type)) {
-        $errors[] = "Please select a document type";
+        $fieldErrors['document_type'] = "Please select a document type";
+        $errors[] = $fieldErrors['document_type'];
     }
     
     // Validate proof document upload
     if (!$proof_document || $proof_document['error'] !== UPLOAD_ERR_OK) {
-        $errors[] = "Please upload a proof of residence document";
+        $fieldErrors['proof_document'] = "Please upload a proof of residence document";
+        $errors[] = $fieldErrors['proof_document'];
     } else {
         $allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
         $max_size = 5 * 1024 * 1024; // 5MB
         
         if (!in_array($proof_document['type'], $allowed_types)) {
-            $errors[] = "Only JPEG, PNG, or PDF files are allowed";
+            $fieldErrors['proof_document'] = "Only JPEG, PNG, or PDF files are allowed";
+            $errors[] = $fieldErrors['proof_document'];
         } elseif ($proof_document['size'] > $max_size) {
-            $errors[] = "File size must be less than 5MB";
+            $fieldErrors['proof_document'] = "File size must be less than 5MB";
+            $errors[] = $fieldErrors['proof_document'];
         }
     }
     
@@ -94,7 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email, $email]);
         
         if ($stmt->fetch()) {
-            $errors[] = "This email is already in use";
+            $fieldErrors['email'] = "This email is already in use";
+            $errors[] = $fieldErrors['email'];
         }
     }
     
@@ -300,17 +314,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </h5>
                             
                             <div class="mb-3">
-                                    <label for="motivation" class="form-label">शिक्षा मित्रमा किन सामेल हुन चाहनुहुन्छ? *</label>
+                                    <label for="motivation" class="form-label">Why do you want to join? *</label>
                                     <textarea class="form-control" id="motivation" name="motivation" rows="4" 
-                                              placeholder="शिक्षा क्षेत्रमा तपाईंको योगदान, समुदायमा देखिएका समस्याहरू, र कसरी मद्दत गर्न चाहनुहुन्छ भन्नुहोस्..." required><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
-                                    <small class="form-text text-muted">Why do you want to join Shiksha Mitra? How can you contribute to educational improvement?</small>
+                                              placeholder="Briefly explain your motivation" required><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
                                 </div>
                             </div>
                             
                             <!-- Password Section -->
                             <div class="mb-4">
                                 <h5 class="text-primary mb-3">
-                                    <i class="fas fa-lock me-2"></i>पासवर्ड सेट गर्नुहोस् (Set Password)
+                                    <i class="fas fa-lock me-2"></i>Password
                                 </h5>
                                 
                                 <div class="row">
@@ -319,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                             <input type="password" class="form-control" id="password" name="password" 
-                                                   placeholder="कमतिमा 8 अक्षर" required>
+                                                   placeholder="At least 8 characters" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -327,7 +340,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                             <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
-                                                   placeholder="पासवर्ड पुन: लेख्नुहोस्" required>
+                                                   placeholder="Re-enter password" required>
                                         </div>
                                     </div>
                                 </div>
@@ -337,28 +350,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="mb-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="terms" required>
-                                    <label class="form-check-label" for="terms">
-                                        म सहमत छु कि मैले प्रदान गरेको जानकारी सत्य छ र शिक्षा मित्रको नियम र सर्तहरू मान्छु। *<br>
-                                        <small class="text-muted">I agree that the information provided is true and I accept Shiksha Mitra's terms and conditions.</small>
-                                    </label>
+                                    <label class="form-check-label" for="terms">I confirm the information is accurate and I accept the terms.</label>
                                 </div>
                             </div>
                             
                             <?php if (empty($success_message)): ?>
                                 <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
-                                    <i class="fas fa-paper-plane me-2"></i>आवेदन पेश गर्नुहोस् (Submit Application)
+                                    <i class="fas fa-paper-plane me-2"></i>Submit Application
                             </button>
                             <?php else: ?>
                                 <div class="text-center">
                                     <a href="../index.php" class="btn btn-success btn-lg">
-                                        <i class="fas fa-home me-2"></i>घर फर्किनुहोस् (Go to Home)
+                                        <i class="fas fa-home me-2"></i>Go to Home
                                     </a>
                                 </div>
                             <?php endif; ?>
                         </form>
                         
                         <div class="text-center">
-                            <p class="mb-0">पहिले नै खाता छ? (Already have an account?) 
+                            <p class="mb-0">Already have an account?
                                 <a href="login.php" class="text-decoration-none text-primary fw-bold">Sign In</a>
                             </p>
                         </div>
@@ -367,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 <div class="text-center mt-3">
                     <a href="../index.php" class="text-decoration-none text-primary">
-                        <i class="fas fa-arrow-left me-2"></i>घर फर्किनुहोस् (Back to Home)
+                        <i class="fas fa-arrow-left me-2"></i>Back to Home
                     </a>
                 </div>
             </div>
