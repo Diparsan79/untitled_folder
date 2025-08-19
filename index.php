@@ -26,13 +26,15 @@ if (!empty($search)) {
 // Only load issues if user is logged in
 $issues = [];
 if (isLoggedIn()) {
-    // Get issues with user info and vote counts
+    // Get issues with user info, vote counts, and latest comment preview
     $query = "
         SELECT i.id, i.title, i.description, i.image_path, i.created_by, i.vote_count, i.created_at,
                u.username AS author_name,
                COUNT(DISTINCT c.id) AS comment_count,
                COALESCE(SUM(CASE WHEN v.vote_type = 'upvote' THEN 1 ELSE 0 END),0) AS upvotes,
-               COALESCE(SUM(CASE WHEN v.vote_type = 'downvote' THEN 1 ELSE 0 END),0) AS downvotes
+               COALESCE(SUM(CASE WHEN v.vote_type = 'downvote' THEN 1 ELSE 0 END),0) AS downvotes,
+               (SELECT c2.content FROM comments c2 WHERE c2.issue_id = i.id ORDER BY c2.created_at DESC LIMIT 1) AS latest_comment,
+               (SELECT u2.username FROM comments c3 JOIN users u2 ON u2.id = c3.user_id WHERE c3.issue_id = i.id ORDER BY c3.created_at DESC LIMIT 1) AS latest_comment_author
         FROM issues i
         LEFT JOIN users u ON i.created_by = u.id
         LEFT JOIN comments c ON i.id = c.issue_id
@@ -49,102 +51,24 @@ if (isLoggedIn()) {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shiksha Mitra</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="index.php">
-                <i class="fas fa-graduation-cap me-2"></i>
-                Shiksha Mitra
-            </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.php">Home</a>
-                    </li>
+<?php include __DIR__ . '/partials/header.php'; ?>
+
+    <div class="layout">
+        <?php include __DIR__ . '/partials/sidebar.php'; ?>
+        <main class="main">
+            <section class="hero">
+                <h1>Community Voice — Education Community</h1>
+                <p>Share educational issues, vote on priorities, and work together for better education.</p>
+                <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
                     <?php if (isLoggedIn()): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="issues/create.php">Post Issue</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-                
-                <!-- Search Bar - Only for logged in users -->
-                <?php if (isLoggedIn()): ?>
-                    <form class="d-flex me-3" method="GET" action="">
-                        <input class="form-control me-2" type="search" name="search" placeholder="Search issues" 
-                               value="<?php echo htmlspecialchars($search); ?>">
-                        <button class="btn btn-outline-light" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </form>
-                <?php endif; ?>
-                
-                <!-- User Menu -->
-                <ul class="navbar-nav">
-                    <?php if (isLoggedIn()): ?>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
-                               data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>
-                                <?php echo htmlspecialchars($_SESSION['username']); ?>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="auth/logout.php">Logout</a></li>
-                            </ul>
-                        </li>
+                        <a href="issues/create.php" class="btn">Post New Issue</a>
                     <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="auth/login.php">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="auth/register.php">Register</a>
-                        </li>
+                        <a href="auth/register.php" class="btn">Join Community</a>
+                        <a href="auth/login.php" class="btn secondary">Sign In</a>
                     <?php endif; ?>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <div class="hero-section">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold text-white mb-3">
-                Shiksha Mitra - Education Community
-            </h1>
-            <p class="lead text-white-50 mb-4">
-                Share educational issues, vote on priorities, and work together for better education
-            </p>
-            <?php if (isLoggedIn()): ?>
-                <a href="issues/create.php" class="btn btn-primary btn-lg">
-                    <i class="fas fa-plus me-2"></i>Post New Issue
-                </a>
-            <?php else: ?>
-                <a href="auth/register.php" class="btn btn-primary btn-lg me-3">
-                    <i class="fas fa-user-plus me-2"></i>Join Community
-                </a>
-                <a href="auth/login.php" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
-
+                </div>
+            </section>
+            
     <!-- Main Content -->
     <div class="container my-5">
         <!-- Messages -->
@@ -191,76 +115,77 @@ if (isLoggedIn()) {
                     </p>
                 </div>
             <?php else: ?>
-                <div class="row">
+                <div class="grid grid-cols-1 gap-4">
                     <?php foreach ($issues as $issue): ?>
-                        <div class="col-12 mb-4">
-                            <div class="card issue-card h-100">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <!-- Voting Section -->
-                                        <div class="col-md-1 text-center">
-                                            <div class="voting-section">
-                                                <button class="btn btn-sm vote-btn upvote-btn" 
-                                                        data-issue-id="<?php echo $issue['id']; ?>"
-                                                        data-vote-type="upvote">
-                                                    <i class="fas fa-chevron-up"></i>
-                                                </button>
-                                                
-                                                <div class="vote-count <?php echo $issue['vote_count'] > 0 ? 'text-success' : ($issue['vote_count'] < 0 ? 'text-danger' : 'text-muted'); ?>">
-                                                    <?php echo $issue['vote_count']; ?>
-                                                </div>
-                                                
-                                                <button class="btn btn-sm vote-btn downvote-btn" 
-                                                        data-issue-id="<?php echo $issue['id']; ?>"
-                                                        data-vote-type="downvote">
-                                                    <i class="fas fa-chevron-down"></i>
-                                                </button>
+                        <?php 
+                            $initial = strtoupper(substr((string)$issue['author_name'], 0, 1));
+                            $desc = (string)$issue['description'];
+                            $tag = 'education';
+                            $lower = strtolower($desc . ' ' . (string)$issue['title']);
+                            if (str_contains($lower, 'road') || str_contains($lower, 'traffic')) { $tag = 'infrastructure'; }
+                            if (str_contains($lower, 'trash') || str_contains($lower, 'pollution') || str_contains($lower, 'water')) { $tag = 'environment'; }
+                            $latestComment = isset($issue['latest_comment']) ? trim((string)$issue['latest_comment']) : '';
+                            $latestAuthor = isset($issue['latest_comment_author']) ? (string)$issue['latest_comment_author'] : '';
+                        ?>
+                        <div class="bg-white/80 dark:bg-[#2d3748] border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-4">
+                            <div class="flex gap-4">
+                                <!-- Vote rail -->
+                                <div class="flex flex-col items-center justify-center w-12">
+                                    <button class="vote-btn upvote-btn text-gray-600 hover:text-primary-600" data-issue-id="<?php echo $issue['id']; ?>" data-vote-type="upvote">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </button>
+                                    <div class="vote-count font-semibold <?php echo ($issue['vote_count']>0?'text-green-600':($issue['vote_count']<0?'text-red-600':'text-gray-500')); ?>" data-issue-id="<?php echo $issue['id']; ?>">
+                                        <?php echo (int)$issue['vote_count']; ?>
+                                    </div>
+                                    <button class="vote-btn downvote-btn text-gray-600 hover:text-primary-600" data-issue-id="<?php echo $issue['id']; ?>" data-vote-type="downvote">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Main -->
+                                <div class="flex-1">
+                                    <div class="flex items-start justify-between">
+                                        <a href="issues/view.php?id=<?php echo $issue['id']; ?>" class="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:underline">
+                                            <?php echo htmlspecialchars($issue['title']); ?>
+                                        </a>
+                                        <?php if ($issue['image_path']): ?>
+                                            <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <i class="fas fa-image mr-1"></i> Image
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                        <?php echo htmlspecialchars(substr($issue['description'], 0, 160)); ?><?php if (strlen($issue['description'])>160) { echo '...'; } ?>
+                                    </p>
+
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <span class="inline-flex items-center rounded-full bg-primary-50 text-primary-700 px-2 py-0.5 text-xs font-medium border border-primary-200">#<?php echo htmlspecialchars($tag); ?></span>
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-xs"><?php echo (int)$issue['comment_count']; ?> comments</span>
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-xs"><i class="fas fa-clock mr-1"></i><?php echo formatDate($issue['created_at']); ?></span>
+                                    </div>
+
+                                    <?php if (!empty($latestComment)): ?>
+                                        <div class="mt-3 flex items-start gap-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-3">
+                                            <div class="h-8 w-8 rounded-full bg-primary-600 text-white flex items-center justify-center text-xs font-bold">
+                                                <?php echo htmlspecialchars(substr($latestAuthor !== '' ? $latestAuthor : 'U', 0, 1)); ?>
+                                            </div>
+                                            <div class="text-sm text-gray-700 dark:text-gray-200">
+                                                <span class="font-semibold"><?php echo htmlspecialchars($latestAuthor !== '' ? $latestAuthor : 'User'); ?>:</span>
+                                                <?php echo htmlspecialchars(substr($latestComment, 0, 120)); ?><?php if (strlen($latestComment)>120) { echo '...'; } ?>
                                             </div>
                                         </div>
-                                        
-                                        <!-- Issue Content -->
-                                        <div class="col-md-11">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-1">
-                                                    <a href="issues/view.php?id=<?php echo $issue['id']; ?>" 
-                                                       class="text-decoration-none">
-                                                        <?php echo htmlspecialchars($issue['title']); ?>
-                                                    </a>
-                                                </h5>
-                                                <?php if ($issue['image_path']): ?>
-                                                    <span class="badge bg-info">
-                                                        <i class="fas fa-image me-1"></i>Has Image
-                                                    </span>
-                                                <?php endif; ?>
+                                    <?php endif; ?>
+
+                                    <div class="mt-3 flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-8 w-8 rounded-full bg-primary-600 text-white flex items-center justify-center text-xs font-bold">
+                                                <?php echo htmlspecialchars($initial); ?>
                                             </div>
-                                            
-                                            <p class="card-text text-muted">
-                                                <?php echo htmlspecialchars(substr($issue['description'], 0, 200)); ?>
-                                                <?php if (strlen($issue['description']) > 200): ?>...<?php endif; ?>
-                                            </p>
-                                            
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="issue-meta">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-user me-1"></i>
-                                                        Posted by <?php echo htmlspecialchars($issue['author_name']); ?>
-                                                    </small>
-                                                    <small class="text-muted ms-3">
-                                                        <i class="fas fa-clock me-1"></i>
-                                                        <?php echo formatDate($issue['created_at']); ?>
-                                                    </small>
-                                                    <small class="text-muted ms-3">
-                                                        <i class="fas fa-comments me-1"></i>
-                                                        <?php echo $issue['comment_count']; ?> comments
-                                                    </small>
-                                                </div>
-                                                
-                                                <a href="issues/view.php?id=<?php echo $issue['id']; ?>" 
-                                                   class="btn btn-outline-primary btn-sm">
-                                                    View Details
-                                                </a>
-                                            </div>
+                                            <span class="text-sm text-gray-600 dark:text-gray-300">by <?php echo htmlspecialchars($issue['author_name']); ?></span>
                                         </div>
+                                        <a href="issues/view.php?id=<?php echo $issue['id']; ?>" class="inline-flex items-center text-primary-700 hover:text-primary-800 text-sm font-medium">
+                                            View Details <i class="fas fa-arrow-right ml-1"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -344,6 +269,7 @@ if (isLoggedIn()) {
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/theme.js"></script>
     <script src="assets/js/voting.js"></script>
 </body>
 </html>

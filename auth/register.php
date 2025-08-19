@@ -244,13 +244,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <!-- Location Information -->
                             <div class="mb-4">
                                 <h5 class="text-primary mb-3">
-                                    <i class="fas fa-map-marker-alt me-2"></i>ठेगाना जानकारी (Location Information)
+                                    <i class="fas fa-map-marker-alt me-2"></i>Location Information
                                 </h5>
                                 
                                 <div class="mb-3">
-                                    <label for="community_id" class="form-label">आफ्नो समुदाय/शहर (Your Community/City) *</label>
+                                    <label for="community_id" class="form-label">Your Community/City *</label>
                                     <select class="form-select" id="community_id" name="community_id" required>
-                                        <option value="">आफ्नो समुदाय छान्नुहोस् (Select your community)</option>
+                                        <option value="">Select your community</option>
                                         <?php 
                                         $current_province = '';
                                         foreach ($communities as $community): 
@@ -269,40 +269,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         if ($current_province !== '') echo '</optgroup>';
                                         ?>
                                     </select>
-                                    <small class="form-text text-muted">कृपया आफ्नो वास्तविक निवासको समुदाय मात्र छान्नुहोस्</small>
+                                    <small class="form-text text-muted">Please select only your actual place of residence</small>
                                 </div>
                                 
                                 <div class="mb-3">
-                                    <label for="address_detail" class="form-label">विस्तृत ठेगाना (Detailed Address) *</label>
+                                    <label for="address_detail" class="form-label">Detailed Address *</label>
                                     <textarea class="form-control" id="address_detail" name="address_detail" rows="3" 
-                                              placeholder="वार्ड नम्बर, टोल, नजिकको चिनारी (Ward number, tole, nearby landmarks)" required><?php echo htmlspecialchars($_POST['address_detail'] ?? ''); ?></textarea>
+                                              placeholder="Ward number, neighborhood, nearby landmarks" required><?php echo htmlspecialchars($_POST['address_detail'] ?? ''); ?></textarea>
                                 </div>
                             </div>
                             
                             <!-- Document Verification -->
                             <div class="mb-4">
                                 <h5 class="text-primary mb-3">
-                                    <i class="fas fa-file-upload me-2"></i>प्रमाणिकरण कागजात (Document Verification)
+                                    <i class="fas fa-file-upload me-2"></i>Document Verification
                                 </h5>
                                 
                                 <div class="mb-3">
-                                    <label for="document_type" class="form-label">प्रमाण कागजातको प्रकार (Document Type) *</label>
+                                    <label for="document_type" class="form-label">Document Type *</label>
                                     <select class="form-select" id="document_type" name="document_type" required>
-                                        <option value="">कागजातको प्रकार छान्नुहोस् (Select document type)</option>
-                                        <option value="citizenship" <?php echo ($_POST['document_type'] ?? '') === 'citizenship' ? 'selected' : ''; ?>>नागरिकता प्रमाणपत्र (Citizenship Certificate)</option>
-                                        <option value="utility_bill" <?php echo ($_POST['document_type'] ?? '') === 'utility_bill' ? 'selected' : ''; ?>>बिजुली/पानीको बिल (Utility Bill)</option>
-                                        <option value="rental_agreement" <?php echo ($_POST['document_type'] ?? '') === 'rental_agreement' ? 'selected' : ''; ?>>भाडा सम्झौता (Rental Agreement)</option>
-                                        <option value="bank_statement" <?php echo ($_POST['document_type'] ?? '') === 'bank_statement' ? 'selected' : ''; ?>>ब्यांक स्टेटमेन्ट (Bank Statement)</option>
+                                        <option value="">Select document type</option>
+                                        <option value="citizenship" <?php echo ($_POST['document_type'] ?? '') === 'citizenship' ? 'selected' : ''; ?>>Citizenship Certificate</option>
+                                        <option value="utility_bill" <?php echo ($_POST['document_type'] ?? '') === 'utility_bill' ? 'selected' : ''; ?>>Utility Bill</option>
+                                        <option value="rental_agreement" <?php echo ($_POST['document_type'] ?? '') === 'rental_agreement' ? 'selected' : ''; ?>>Rental Agreement</option>
+                                        <option value="bank_statement" <?php echo ($_POST['document_type'] ?? '') === 'bank_statement' ? 'selected' : ''; ?>>Bank Statement</option>
                                     </select>
                             </div>
                             
                             <div class="mb-3">
-                                    <label for="proof_document" class="form-label">निवास प्रमाण कागजात (Proof of Residence) *</label>
+                                    <label for="proof_document" class="form-label">Proof of Residence *</label>
                                     <input type="file" class="form-control" id="proof_document" name="proof_document" 
                                            accept=".jpg,.jpeg,.png,.pdf" required>
                                     <small class="form-text text-muted">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        JPEG, PNG, वा PDF फाइल (5MB भन्दा कम) | Clear photo/scan required
+                                        JPEG, PNG, or PDF (under 5MB). Clear photo/scan required
                                     </small>
                                 </div>
                             </div>
@@ -310,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <!-- Application Details -->
                             <div class="mb-4">
                                 <h5 class="text-primary mb-3">
-                                    <i class="fas fa-edit me-2"></i>आवेदन विवरण (Application Details)
+                                    <i class="fas fa-edit me-2"></i>Application Details
                                 </h5>
                             
                             <div class="mb-3">
@@ -385,5 +385,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/theme.js"></script>
 </body>
 </html>

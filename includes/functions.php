@@ -1,4 +1,6 @@
 <?php
+if (!defined('CV_FUNCTIONS_LOADED')) {
+define('CV_FUNCTIONS_LOADED', true);
 /**
  * Utility Functions
  */
@@ -6,9 +8,11 @@
 require_once __DIR__ . '/../config/database.php';
 
 // Start session if not already started
-function startSession() {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
+if (!function_exists('startSession')) {
+    function startSession() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     }
 }
 
@@ -127,5 +131,6 @@ function displayMessage() {
                 </div>";
     }
     return '';
+}
 }
 ?>

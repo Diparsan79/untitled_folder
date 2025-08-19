@@ -1,4 +1,306 @@
 <?php
+require_once __DIR__ . '/../includes/functions.php';
+
+startSession();
+
+// Simple admin auth (static credentials)
+if (!isset($_SESSION['is_admin'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['username'], $_POST['password'])) {
+        if ($_POST['username'] === 'admin' && $_POST['password'] === 'password') {
+            $_SESSION['is_admin'] = true;
+            redirect('index.php', 'Welcome, Admin!', 'success');
+        } else {
+            $login_error = 'Invalid credentials';
+        }
+    }
+}
+
+if (!isset($_SESSION['is_admin'])) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Login - Shiksha Mitra</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="../assets/css/style.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <div class="card shadow">
+                        <div class="card-body p-4">
+                            <h3 class="mb-3">Admin Login</h3>
+                            <?php if (!empty($login_error)): ?>
+                                <div class="alert alert-danger"><?php echo $login_error; ?></div>
+                            <?php endif; ?>
+                            <form method="post">
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input class="form-control" name="username" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" name="password" required>
+                                </div>
+                                <button class="btn btn-primary w-100" type="submit">Login</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="../assets/js/theme.js"></script>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+$pdo = getDBConnection();
+// Handle moderation actions with CSRF
+$csrf = generateCSRFToken();
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['csrf']) && verifyCSRFToken($_POST['csrf'])) {
+    if (isset($_POST['action'])) {
+        if ($_POST['action'] === 'delete_issue' && !empty($_POST['issue_id'])) {
+            $stmt = $pdo->prepare('DELETE FROM issues WHERE id = ?');
+            $stmt->execute([(int)$_POST['issue_id']]);
+            redirect('index.php', 'Issue deleted.', 'success');
+        }
+        if ($_POST['action'] === 'delete_comment' && !empty($_POST['comment_id'])) {
+            $stmt = $pdo->prepare('DELETE FROM comments WHERE id = ?');
+            $stmt->execute([(int)$_POST['comment_id']]);
+            redirect('index.php', 'Comment deleted.', 'success');
+        }
+        if ($_POST['action'] === 'suspend_user' && !empty($_POST['user_id'])) {
+            // Use verification flag as simple suspension toggle
+            $userId = (int)$_POST['user_id'];
+            $row = $pdo->prepare('SELECT is_verified FROM users WHERE id = ?');
+            $row->execute([$userId]);
+            $current = $row->fetchColumn();
+            $new = ($current == 1) ? 0 : 1;
+            $stmt = $pdo->prepare('UPDATE users SET is_verified = ? WHERE id = ?');
+            $stmt->execute([$new, $userId]);
+            redirect('index.php', $new ? 'User unsuspended.' : 'User suspended.', 'success');
+        }
+    }
+}
+
+// Stats
+$totalUsers = (int)$pdo->query('SELECT COUNT(*) FROM users')->fetchColumn();
+$activeUsers = (int)$pdo->query('SELECT COUNT(*) FROM users WHERE last_login IS NOT NULL')->fetchColumn();
+$totalIssues = (int)$pdo->query('SELECT COUNT(*) FROM issues')->fetchColumn();
+$totalVotes = (int)$pdo->query('SELECT COUNT(*) FROM votes')->fetchColumn();
+
+// Most active users (issues + comments)
+$mostActive = $pdo->query('
+    SELECT u.id, u.username,
+           (SELECT COUNT(*) FROM issues i WHERE i.created_by = u.id) AS issues_count,
+           (SELECT COUNT(*) FROM comments c WHERE c.user_id = u.id) AS comments_count
+    FROM users u
+    ORDER BY (issues_count + comments_count) DESC
+    LIMIT 10
+')->fetchAll();
+
+// Top trending issues
+$topIssues = $pdo->query('
+    SELECT id, title, vote_count, created_at
+    FROM issues
+    ORDER BY vote_count DESC, created_at DESC
+    LIMIT 10
+')->fetchAll();
+
+// Community breakdown by user contributions
+$communityBreakdown = $pdo->query('
+    SELECT c.name AS community, COUNT(i.id) AS issues_count
+    FROM users u
+    JOIN communities c ON c.id = u.community_id
+    LEFT JOIN issues i ON i.created_by = u.id
+    GROUP BY c.id, c.name
+    ORDER BY issues_count DESC
+')->fetchAll();
+
+// Recent moderation queues
+$recentIssues = $pdo->query('SELECT i.id, i.title, u.username FROM issues i JOIN users u ON u.id = i.created_by ORDER BY i.created_at DESC LIMIT 10')->fetchAll();
+$recentComments = $pdo->query('SELECT c.id, c.comment, u.username FROM comments c JOIN users u ON u.id = c.user_id ORDER BY c.created_at DESC LIMIT 10')->fetchAll();
+$recentUsers = $pdo->query('SELECT id, username, email, is_verified FROM users ORDER BY created_at DESC LIMIT 10')->fetchAll();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Shiksha Mitra</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <style>
+        .card-metric { border-radius: 16px; }
+        .shadow-soft { box-shadow: 0 10px 20px rgba(0,0,0,.06); }
+    </style>
+    <script src="../assets/js/theme.js"></script>
+</head>
+<body>
+    <div class="container my-4">
+        <?php echo displayMessage(); ?>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="fw-bold">Admin Dashboard</h2>
+            <a href="email_preview.php" class="btn btn-outline-primary">Email Preview</a>
+        </div>
+
+        <!-- Metrics -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card card-metric shadow-soft">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted">Total Users</div>
+                                <div class="h4 mb-0"><?php echo $totalUsers; ?></div>
+                            </div>
+                            <i class="fas fa-users fa-lg text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-metric shadow-soft">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted">Active Users</div>
+                                <div class="h4 mb-0"><?php echo $activeUsers; ?></div>
+                            </div>
+                            <i class="fas fa-user-check fa-lg text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-metric shadow-soft">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted">Total Issues</div>
+                                <div class="h4 mb-0"><?php echo $totalIssues; ?></div>
+                            </div>
+                            <i class="fas fa-list fa-lg text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card card-metric shadow-soft">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-muted">Total Votes</div>
+                                <div class="h4 mb-0"><?php echo $totalVotes; ?></div>
+                            </div>
+                            <i class="fas fa-vote-yea fa-lg text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <!-- Moderation -->
+            <div class="col-lg-6">
+                <div class="card shadow-soft">
+                    <div class="card-header"><strong>Moderation - Issues</strong></div>
+                    <div class="card-body">
+                        <?php foreach ($recentIssues as $it): ?>
+                            <form method="post" class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    <strong>#<?php echo $it['id']; ?></strong> <?php echo htmlspecialchars($it['title']); ?>
+                                    <small class="text-muted">by <?php echo htmlspecialchars($it['username']); ?></small>
+                                </div>
+                                <div>
+                                    <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                                    <input type="hidden" name="issue_id" value="<?php echo $it['id']; ?>">
+                                    <button class="btn btn-sm btn-outline-danger" name="action" value="delete_issue">Delete</button>
+                                </div>
+                            </form>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="card shadow-soft mt-3">
+                    <div class="card-header"><strong>Moderation - Comments</strong></div>
+                    <div class="card-body">
+                        <?php foreach ($recentComments as $cm): ?>
+                            <form method="post" class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div class="text-truncate" style="max-width: 70%;">
+                                    <small class="text-muted"><?php echo htmlspecialchars($cm['username']); ?>:</small>
+                                    <?php echo htmlspecialchars(substr($cm['comment'],0,80)); ?>
+                                </div>
+                                <div>
+                                    <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                                    <input type="hidden" name="comment_id" value="<?php echo $cm['id']; ?>">
+                                    <button class="btn btn-sm btn-outline-danger" name="action" value="delete_comment">Delete</button>
+                                </div>
+                            </form>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="col-lg-6">
+                <div class="card shadow-soft">
+                    <div class="card-header"><strong>Top Trending Issues</strong></div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            <?php foreach ($topIssues as $ti): ?>
+                                <li class="mb-1">
+                                    <strong><?php echo htmlspecialchars($ti['title']); ?></strong>
+                                    <small class="text-muted">(Votes: <?php echo (int)$ti['vote_count']; ?>)</small>
+                                </li>
+                            <?php endforeach; ?>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="card shadow-soft mt-3">
+                    <div class="card-header"><strong>Most Active Users</strong></div>
+                    <div class="card-body">
+                        <ol class="mb-0">
+                            <?php foreach ($mostActive as $mu): ?>
+                                <li class="mb-1">
+                                    <strong><?php echo htmlspecialchars($mu['username']); ?></strong>
+                                    <small class="text-muted">Issues: <?php echo (int)$mu['issues_count']; ?>, Comments: <?php echo (int)$mu['comments_count']; ?></small>
+                                    <form method="post" class="d-inline ms-2">
+                                        <input type="hidden" name="csrf" value="<?php echo $csrf; ?>">
+                                        <input type="hidden" name="user_id" value="<?php echo (int)$mu['id']; ?>">
+                                        <button class="btn btn-sm btn-outline-warning" name="action" value="suspend_user">Toggle Suspend</button>
+                                    </form>
+                                </li>
+                            <?php endforeach; ?>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="card shadow-soft mt-3">
+                    <div class="card-header"><strong>Community Breakdown</strong></div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <?php foreach ($communityBreakdown as $cb): ?>
+                                <li><?php echo htmlspecialchars($cb['community']); ?> — <strong><?php echo (int)$cb['issues_count']; ?></strong> issues</li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<?php
 require_once '../includes/functions.php';
 require_once '../includes/email_functions.php';
 

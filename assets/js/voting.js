@@ -69,7 +69,7 @@ function handleVote(event) {
 
 function updateVoteCount(issueId, newCount) {
     // Find all vote count elements for this issue
-    const voteCounts = document.querySelectorAll(`[data-issue-id="${issueId}"] .vote-count, .vote-count`);
+    const voteCounts = document.querySelectorAll(`.vote-count[data-issue-id="${issueId}"]`);
     
     voteCounts.forEach(countElement => {
         // Update the number
